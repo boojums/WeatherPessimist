@@ -1,3 +1,11 @@
+//
+//  WeatherData.h
+//  WeatherPessimist
+//
+//  Created by Cristina Luis on 8/17/12.
+//  Copyright (c) 2012 Cristina Luis. All rights reserved.
+//
+
 @interface WeatherData : NSObject
 {
     int             climateZone;
@@ -7,6 +15,7 @@
     NSDictionary    *nextDayForecast;
     NSDictionary    *twoDayForecast;
     NSString        *code;
+    NSDictionary    *codeDictionary;
 }
 
 

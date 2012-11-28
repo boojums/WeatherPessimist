@@ -1,21 +1,22 @@
-/*
-    WeatherData class implementation
- 
- Pessimizes current conditions and forecast based on climate area
+//
+//  WeatherData.m
+//  WeatherPessimist
+//
+//  Pessimizes current conditions and forecast based on climate area
+//  To use: initialize with a json object from WorldWeatherOnline
+//
+//  Created by Cristina Luis on 8/17/12.
+//  Copyright (c) 2012 Cristina Luis. All rights reserved.
+//
 
- To use: initialize with a json object from WorldWeatherOnline
- 
+/*
  To do list:
-- adjust zip codes method?
-- lat/lon climate zone method
-- city climate zone method
+- use location information from request itself to assign climate zone. see:
+    http://koeppen-geiger.vu-wien.ac.at/present.htm
 - get current location in lat/lon
 - enum for zone constants?
 - pessimized variables should just be a dictionary? of NSNumbers?
-
-- have one dictionary for each climate zone in plist (duplicate existing entries)
- --randomize which description gets used
-- first screen current conditions, next screen next-day forecast
+- first screen current conditions, next screen next-day forecast, etc.
 - preferences screen/button
  */
 
@@ -51,27 +52,35 @@
     //current_condition has an array of one, which is a dictionary
     //weather is an array of two, nextDayForecast and twoDayForecast
 
+    //should this be an enum list?
     climateZoneMethods = [NSArray arrayWithObjects:@"none", @"desert", @"southeast", @"northeast", @"midwest", @"mountainWest", @"pacificNW", @"midatlantic", nil];
 
-    if (self) {
-        //if query was of type 'zip code'
-        [self setClimateZoneByZip:zip];
-        NSLog(@"climateZone set to %i, %@", climateZone, climateZoneMethods[climateZone]);
-        
-        [self pessimizeData];
-    }
-
-    //get today's date
+    //get today's date -- should probably use date from weather request instead!
     NSDate *today = [NSDate date];
     NSCalendar *gregorian = [[NSCalendar alloc]
                              initWithCalendarIdentifier:NSGregorianCalendar];
     dateComponents = [gregorian components:NSMonthCalendarUnit fromDate:today];
     
+    if (self) {
+        //if query was of type 'zip code'
+        [self setClimateZoneByZip:zip];
+        NSLog(@"climateZone set to %i, %@", climateZone, climateZoneMethods[climateZone]);
+        
+        //set codeDictionary to be dictionary for codes of climate zone
+        NSString *plistPath = [[NSBundle mainBundle] pathForResource:@"wxcodes" ofType:@"plist"];
+        //should check if plistPath is valid
+        NSDictionary *wxCodes = [NSDictionary dictionaryWithContentsOfFile:plistPath];
+        NSString *temp = climateZoneMethods[climateZone];
+        codeDictionary = [[wxCodes objectForKey:temp]
+                          objectForKey:code];
+
+        [self pessimizeData];
+    }
+
     return self;
  
 }
 
-//need NSNumber selector method
 - (void) setClimateZoneByZip:(NSNumber *)zipCode
 {
     int zip = [zipCode intValue];
@@ -122,27 +131,29 @@
     
 }
 
+
+// ******************************************************************************** pessimizeData
 - (void)pessimizeData
 {
 
     //check for special zip code/date possibilities (tornado, hurricane, flood, super hot, plague, etc)
     //have special date/location checks for holidays, red sox/yankees, etc.
     //alert sequence if it's *really* bad (super hot days in AZ, osv.) "Are you really sure you want to see this?"
-    //fetch description based on wxcode from json and climate zone
-    NSString *plistPath = [[NSBundle mainBundle] pathForResource:@"wxcodes" ofType:@"plist"];
-    //should check if plistPath is valid
-    NSDictionary *wxCodes = [NSDictionary dictionaryWithContentsOfFile:plistPath];
-    NSDictionary *codeDictionary = [wxCodes objectForKey:code];
-    self->description = (NSString *)[[codeDictionary objectForKey:@"descriptions"] objectAtIndex:climateZone];
+   
+    //set default description
+    //randomized or incremented over time if multiple identical codes in a row
+    description = (NSString *)[[codeDictionary objectForKey:@"descriptions"]
+                               objectAtIndex:0];
 
-    NSLog(@"description for %@ code at %d: %@", code, climateZone, description);
+    NSLog(@"description for %@ code at %d: %@", code, 0, description);
 
     //should this be in the init method instead? **********************
     //should be NSNumber?
-    self.tempF = [[currentConditions objectForKey:@"temp_F"] intValue];
-    self.wind_mph = [currentConditions objectForKey:@"windspeedMiles"];
-    self.nextTemp = [nextDayForecast objectForKey:@"tempMaxF"];
-    self.twoDayTemp = [twoDayForecast objectForKey:@"tempMaxF"];
+    tempF = [[currentConditions objectForKey:@"temp_F"] intValue];
+    wind_mph = [currentConditions objectForKey:@"windspeedMiles"];
+    nextTemp = [nextDayForecast objectForKey:@"tempMaxF"];
+    twoDayTemp = [twoDayForecast objectForKey:@"tempMaxF"];
+    
     
     //call the special pessimizer function based on the climate zone
     SEL s = NSSelectorFromString(self->climateZoneMethods[climateZone]);
@@ -152,10 +163,14 @@
 #pragma clang diagnostic pop
 }
 
+// ******************************************************************************** none
+
 - (void)none
 {
     return;
 }
+
+// ******************************************************************************** desert
 
 - (void)desert
 {
@@ -169,7 +184,7 @@
         tempF -= 10;
     
     //if monsoon season, and humidity is reasonably high, make it higher with no rain
-    if ((dateComponents.month > 6) && (dateComponents.month <10))
+    if ((dateComponents.month > 6) && (dateComponents.month < 10))
         {
             //humidity higher
             //no precip value
@@ -189,30 +204,42 @@
     }
 }
 
+// ******************************************************************************** southeast
+
 - (void)southeast
 {
     
 }
+
+// ******************************************************************************** northeast
 
 - (void)northeast
 {
     
 }
 
+// ******************************************************************************** midwest
+
 - (void)midwest
 {
     
 }
+
+// ******************************************************************************** mountainWest
 
 - (void)mountainWest
 {
     
 }
 
+// ******************************************************************************** pacificNW
+
 - (void)pacificNW
 {
     
 }
+
+// ******************************************************************************** midatlantic
 
 - (void)midatlantic
 {
