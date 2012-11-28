@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		C2A9EB58165C279700B8CAFA /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = C2A9EB57165C279700B8CAFA /* Default-568h@2x.png */; };
+		C2A9EB5C165E7E8F00B8CAFA /* WeatherData.m in Sources */ = {isa = PBXBuildFile; fileRef = C2A9EB5B165E7E8F00B8CAFA /* WeatherData.m */; };
 		C2DBD3F115DEDE650076104E /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C2DBD3F015DEDE650076104E /* UIKit.framework */; };
 		C2DBD3F315DEDE650076104E /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C2DBD3F215DEDE650076104E /* Foundation.framework */; };
 		C2DBD3F515DEDE650076104E /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C2DBD3F415DEDE650076104E /* CoreGraphics.framework */; };
@@ -15,9 +17,13 @@
 		C2DBD40115DEDE650076104E /* WeatherPessimistAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = C2DBD40015DEDE650076104E /* WeatherPessimistAppDelegate.m */; };
 		C2DBD40415DEDE650076104E /* MainStoryboard.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C2DBD40215DEDE650076104E /* MainStoryboard.storyboard */; };
 		C2DBD40715DEDE650076104E /* WeatherPessimistViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = C2DBD40615DEDE650076104E /* WeatherPessimistViewController.m */; };
+		C2DBD40E15DF8E510076104E /* wxcodes.plist in Resources */ = {isa = PBXBuildFile; fileRef = C2DBD40D15DF8E510076104E /* wxcodes.plist */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		C2A9EB57165C279700B8CAFA /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
+		C2A9EB5A165E7DFB00B8CAFA /* WeatherData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WeatherData.h; sourceTree = "<group>"; };
+		C2A9EB5B165E7E8F00B8CAFA /* WeatherData.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WeatherData.m; sourceTree = "<group>"; };
 		C2DBD3EC15DEDE650076104E /* WeatherPessimist.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WeatherPessimist.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C2DBD3F015DEDE650076104E /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		C2DBD3F215DEDE650076104E /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -31,6 +37,7 @@
 		C2DBD40315DEDE650076104E /* en */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = en; path = en.lproj/MainStoryboard.storyboard; sourceTree = "<group>"; };
 		C2DBD40515DEDE650076104E /* WeatherPessimistViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WeatherPessimistViewController.h; sourceTree = "<group>"; };
 		C2DBD40615DEDE650076104E /* WeatherPessimistViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = WeatherPessimistViewController.m; sourceTree = "<group>"; };
+		C2DBD40D15DF8E510076104E /* wxcodes.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = wxcodes.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -50,6 +57,7 @@
 		C2DBD3E115DEDE650076104E = {
 			isa = PBXGroup;
 			children = (
+				C2A9EB57165C279700B8CAFA /* Default-568h@2x.png */,
 				C2DBD3F615DEDE650076104E /* WeatherPessimist */,
 				C2DBD3EF15DEDE650076104E /* Frameworks */,
 				C2DBD3ED15DEDE650076104E /* Products */,
@@ -82,6 +90,9 @@
 				C2DBD40215DEDE650076104E /* MainStoryboard.storyboard */,
 				C2DBD40515DEDE650076104E /* WeatherPessimistViewController.h */,
 				C2DBD40615DEDE650076104E /* WeatherPessimistViewController.m */,
+				C2A9EB5A165E7DFB00B8CAFA /* WeatherData.h */,
+				C2A9EB5B165E7E8F00B8CAFA /* WeatherData.m */,
+				C2DBD40D15DF8E510076104E /* wxcodes.plist */,
 				C2DBD3F715DEDE650076104E /* Supporting Files */,
 			);
 			path = WeatherPessimist;
@@ -152,6 +163,8 @@
 			files = (
 				C2DBD3FB15DEDE650076104E /* InfoPlist.strings in Resources */,
 				C2DBD40415DEDE650076104E /* MainStoryboard.storyboard in Resources */,
+				C2DBD40E15DF8E510076104E /* wxcodes.plist in Resources */,
+				C2A9EB58165C279700B8CAFA /* Default-568h@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -165,6 +178,7 @@
 				C2DBD3FD15DEDE650076104E /* main.m in Sources */,
 				C2DBD40115DEDE650076104E /* WeatherPessimistAppDelegate.m in Sources */,
 				C2DBD40715DEDE650076104E /* WeatherPessimistViewController.m in Sources */,
+				C2A9EB5C165E7E8F00B8CAFA /* WeatherData.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -246,6 +260,7 @@
 				GCC_PREFIX_HEADER = "WeatherPessimist/WeatherPessimist-Prefix.pch";
 				INFOPLIST_FILE = "WeatherPessimist/WeatherPessimist-Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = 1;
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
@@ -257,6 +272,7 @@
 				GCC_PREFIX_HEADER = "WeatherPessimist/WeatherPessimist-Prefix.pch";
 				INFOPLIST_FILE = "WeatherPessimist/WeatherPessimist-Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = 1;
 				WRAPPER_EXTENSION = app;
 			};
 			name = Release;
@@ -280,6 +296,7 @@
 				C2DBD40C15DEDE650076104E /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

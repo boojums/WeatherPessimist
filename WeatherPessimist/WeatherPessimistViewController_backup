@@ -13,6 +13,14 @@
 #define kJSONStringURLBeginning @"http://free.worldweatheronline.com/feed/weather.ashx?q="
 #define kJSONStringURLEnd @"&format=json&num_of_days=2&key=be45236e98154106120808"
 
+#define kNoClimateZone 0;
+#define kHotDesert 1;
+#define kSoutheast 2;
+#define kRedSoxNation 3;
+#define kFlyoverStates 4;
+#define kMountainWest 5;
+#define kPacificNW 6;
+#define kMidAtlantic 7;
 
 #import "WeatherData.h"
 #import "WeatherPessimistViewController.h"
@@ -81,18 +89,97 @@
     
     // TODO: check if returned data is NULL; alert and abort if so
     NSDictionary *data = [responseData objectForKey:@"data"];
-
+    //Keys in data are: weather, request, cuirrent_condition
+    
+    //current_condition has an array of one, which is a dictionary
+    NSDictionary *currentConditions = [[data objectForKey:@"current_condition"] objectAtIndex:0];
+    
+    //weather is an array of two, nextDayForecast and twoDayForecast
+    NSDictionary *nextDayForecast = [[data objectForKey:@"weather"] objectAtIndex:0];
+    NSDictionary *twoDayForecast = [[data objectForKey:@"weather"] objectAtIndex:1];
+    NSNumber *zip = [[[data objectForKey:@"request"] objectAtIndex:0] objectForKey:@"query"];
+    NSString *code = (NSString *)[currentConditions objectForKey:@"weatherCode"];
+ 
     //need proper construction/destruction of weatherData objects
     WeatherData *weatherData = [[WeatherData alloc] initWithData:data];
+    NSLog(@"weatherData.tempF: %d", weatherData.tempF);
+    
+    int climateZone = [self calculateClimateZone:zip];
+    
+    //fetch description based on wxcode from json and climate zone
+    NSString *plistPath = [[NSBundle mainBundle] pathForResource:@"wxcodes" ofType:@"plist"];
+    //should check if plistPath is valid
+    NSDictionary *wxCodes = [NSDictionary dictionaryWithContentsOfFile:plistPath];
+    NSDictionary *codeDictionary = [wxCodes objectForKey:code];
+    NSString *description = (NSString *)[[codeDictionary objectForKey:@"descriptions"] objectAtIndex:climateZone];
+    //NSLog(@"description for %@ code at 1: %@", code, description);
+    
 
-    //update labels with weatherData pessimized data
+    /*
+     NSEnumerator *enumerator = [twoDayForecast keyEnumerator];
+     id key;
+     while ((key = [enumerator nextObject])) {
+     NSLog(@"key: %@", key);
+     NSLog(@"%@", [twoDayForecast objectForKey:key]);
+     }
+     */
+    
+    int tempF = [[currentConditions objectForKey:@"temp_F"] intValue];
+    
+    //map condition codes to my own set of randomly-selected pessimistic conditions :-)
+    //store these values (or the dictionary?) to save state/cache
+    NSNumber *wind_mph = [currentConditions objectForKey:@"windspeedMiles"];
     currentLabel.numberOfLines = 0;
+    //currentLabel.text = [NSString stringWithFormat:@"temperature: %d\n windspeed: %@ \n conditions: %@",tempF, wind_mph, description];
     currentLabel.text = [NSString stringWithFormat:@"temperature:%d\n windspeed: %@ \n conditions: %@", weatherData.tempF, weatherData.wind_mph, weatherData.description];
     
+    NSNumber *tempMaxF = [nextDayForecast objectForKey:@"tempMaxF"];
+    //nextDayLabel.text = [NSString stringWithFormat:@"Tomorrow will be %@°F", tempMaxF];
     nextDayLabel.text = [NSString stringWithFormat:@"Tomorrow will be %@°F", weatherData.nextTemp];
    
+    tempMaxF = [twoDayForecast objectForKey:@"tempMaxF"];
+    //twoDayLabel.text = [NSString stringWithFormat:@"The next day will be %@°F", tempMaxF];
     twoDayLabel.text = [NSString stringWithFormat:@"The next day will be %@°F", weatherData.twoDayTemp];
 
+}
+
+//returns climate zone for given zip code
+//todo: a function for returning climate zones for a given lat/long
+- (int)calculateClimateZone:(NSNumber *)zipCode {
+    int zip = [zipCode intValue];
+    NSLog(@"Zip code is: %d",zip);
+
+    //some kind of NSNumber range comparison method?
+    if (((zip >= 85000) && (zip < 88500)) || ((zip >= 88900) && (zip < 90000))){
+        return kHotDesert;
+    }
+    else if (((zip >= 27000 ) && (zip < 40000)) || ((zip >= 70000) && (zip < 80000))) {
+        return kSoutheast;
+    }
+    else if ((zip >= 01000) && (zip < 07000)) {
+        return kRedSoxNation;
+    }
+    else if (((zip >= 80000) && (zip < 85000)) || ((zip >= 59000) && (zip < 60000))){
+        return kMountainWest;
+    }
+    else if ((zip >= 40000) && (zip < 70000)) { // need to remove montana (59)
+        return kFlyoverStates;
+    }
+    else if ((zip >= 97000) && (zip < 99500)) {
+        return kPacificNW;
+    }
+    else if ((zip >= 07000) && (zip < 27000)) {
+        return kMidAtlantic;
+    }
+    else if ((zip >= 90000) && (zip < 97000)) { // California and Hawaii
+        return kHotDesert;
+    }
+    else if ((zip >= 99500) && (zip < 100000)) { //Alaska
+        return kMidAtlantic;
+    }
+
+    NSLog(@"No climate zone defined for %i", zip);
+    return kNoClimateZone;
 }
 
 - (IBAction)buttonPushed {
