@@ -32,11 +32,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "WeatherPessimist/WeatherPessimistViewController.m"
-         timestampString = "376056971.519204"
+         timestampString = "376068908.516582"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "85"
-         endingLineNumber = "85"
+         startingLineNumber = "102"
+         endingLineNumber = "102"
          landmarkName = "-fetchedData:"
          landmarkType = "5">
       </FileBreakpoint>

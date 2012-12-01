@@ -14,8 +14,6 @@
 - get current location in lat/lon
 - enum for zone constants?
 - pessimized variables should just be a dictionary? of NSNumbers? one for each day
-- first screen current conditions, next screen next-day forecast, etc.
- -- scrollview with paging! 
 - preferences screen/button
  */
 

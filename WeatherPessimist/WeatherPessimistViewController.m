@@ -55,6 +55,7 @@
 @synthesize currentLabel;
 @synthesize nextDayLabel;
 @synthesize twoDayLabel;
+@synthesize scrollView, pageControl;
 
 //class for holding current weather data? can be stored as object?
 //1. get current location
@@ -73,6 +74,22 @@
     dispatch_async(kBgQueue, ^{
         NSDictionary *json = [NSDictionary dictionaryWithContentsOfJSONURLString:kJSONStringURL];        [self performSelectorOnMainThread:@selector(fetchedData:)                                                                                                                                  withObject:json waitUntilDone:YES]; //fetchedData must be on main thread b/c UI stuff
     });
+    
+    pageControlBeingUsed = NO;
+    
+    for (int i = 0; i < 2; i++) {
+        CGRect frame;
+        frame.origin.x = self.scrollView.frame.size.width * i;
+        frame.origin.y = 0;
+        frame.size = self.scrollView.frame.size;
+    }
+    
+    self.scrollView.contentSize = CGSizeMake(self.scrollView.frame.size.width * 2, self.scrollView.frame.size.height);
+    
+    self.pageControl.currentPage = 0;
+    self.pageControl.numberOfPages = 2;
+    
+    
 }
 
 //called once data has been retrieved from web - should be bg thread if large file to be parsed
@@ -157,6 +174,39 @@
     [prefs synchronize];
 }
 
+- (void)scrollViewDidScroll:(UIScrollView *)sender {
+	if (!pageControlBeingUsed) {
+		// Switch the indicator when more than 50% of the previous/next page is visible
+		CGFloat pageWidth = self.scrollView.frame.size.width;
+		int page = floor((self.scrollView.contentOffset.x - pageWidth / 2) / pageWidth) + 1;
+		self.pageControl.currentPage = page;
+        NSLog(@"current page = %d", page);
+	}
+}
+
+- (IBAction)changePage {
+	// Update the scroll view to the appropriate page
+	CGRect frame;
+	frame.origin.x = self.scrollView.frame.size.width * self.pageControl.currentPage;
+	frame.origin.y = 0;
+	frame.size = self.scrollView.frame.size;
+	[self.scrollView scrollRectToVisible:frame animated:YES];
+    
+	// Keep track of when scrolls happen in response to the page control
+	// value changing. If we don't do this, a noticeable "flashing" occurs
+	// as the the scroll delegate will temporarily switch back the page
+	// number.
+	pageControlBeingUsed = YES;
+}
+
+- (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView {
+    pageControlBeingUsed = NO;
+}
+
+- (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView {
+    pageControlBeingUsed = NO;
+}
+
 - (BOOL)needToUpdate {
   //needs to be written
     return 1;
@@ -167,6 +217,9 @@
     [self setCurrentLabel:nil];
     [self setNextDayLabel:nil];
     [self setTwoDayLabel:nil];
+    self.scrollView = nil;
+    self.pageControl = nil;
+
     [super viewDidUnload];
     // Release any retained subviews of the main view.
 }
