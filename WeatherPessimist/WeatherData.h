@@ -14,6 +14,7 @@
     NSDictionary    *currentConditions;
     NSDictionary    *nextDayForecast;
     NSDictionary    *twoDayForecast;
+    NSDictionary    *nearest_area;
     NSString        *code;
     NSDictionary    *codeDictionary;
 }
@@ -44,5 +45,6 @@
 - (void)mountainWest;
 - (void)pacificNW;
 - (void)midatlantic;
+- (void)climateClassification;
 @end
 

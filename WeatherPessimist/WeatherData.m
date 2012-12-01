@@ -11,12 +11,11 @@
 
 /*
  To do list:
-- use location information from request itself to assign climate zone. see:
-    http://koeppen-geiger.vu-wien.ac.at/present.htm
 - get current location in lat/lon
 - enum for zone constants?
-- pessimized variables should just be a dictionary? of NSNumbers?
+- pessimized variables should just be a dictionary? of NSNumbers? one for each day
 - first screen current conditions, next screen next-day forecast, etc.
+ -- scrollview with paging! 
 - preferences screen/button
  */
 
@@ -46,9 +45,9 @@
     //this is only a zip code if the type of request was a zip code -- need to check request type
     NSNumber *zip = [[[data objectForKey:@"request"] objectAtIndex:0] objectForKey:@"query"];
     self->code = (NSString *)[currentConditions objectForKey:@"weatherCode"];
-
+    nearest_area = [[data objectForKey:@"nearest_area"] objectAtIndex:0];
    
-    //Keys in jsondata are: weather, request, current_condition
+    //Keys in jsondata are: weather, nearest_area, request, current_condition
     //current_condition has an array of one, which is a dictionary
     //weather is an array of two, nextDayForecast and twoDayForecast
 
@@ -77,6 +76,7 @@
         [self pessimizeData];
     }
 
+    [self climateClassification];
     return self;
  
 }
@@ -128,6 +128,9 @@
 
 - (void) setClimateZoneByLat:(float)latititude andLong:(float)longitude
 {
+    //round lat and long to nearest .25
+    //straight lookup of KÖPPEN-GEIGER classification
+    //map that to my own definitions
     
 }
 
@@ -177,7 +180,7 @@
     //do crazy stuff to the pessimize the data
     NSLog(@"desert called successfully");
     
-    //NSNumber ranges?
+    //if temp is really high, alert saying, "weather forecast is bad enough already"
     if(tempF > 80)
         tempF += 10; //randomize for some variability
     else if(tempF < 40)
@@ -246,7 +249,49 @@
     
 }
 
+- (void)climateClassification
+{
+    NSString *plistPath = [[NSBundle mainBundle] pathForResource:@"climate_class" ofType:@"plist"];
+    //should check if plistPath is valid
+    NSDictionary *climate_classification = [NSDictionary dictionaryWithContentsOfFile:plistPath];
+    NSString *latitude = [nearest_area objectForKey:@"latitude"];
+    NSString *longitude = [nearest_area objectForKey:@"longitude"];
 
+    NSLog(@"latitude and longitude are %@ and %@", latitude, longitude);
+
+    float latitude_number = [latitude floatValue];
+    float longitude_number = [longitude floatValue];
+    
+    
+    //this is not perfect at all - roughly maps to closest .25 or .75
+    int halves;
+    if(latitude_number > 0) {
+        halves = (int)(latitude_number * 2 + 0.2);
+        latitude_number = halves * 0.5 + 0.25;
+    }
+    else {
+        halves = (int)(latitude_number * 2 - 0.2);
+        latitude_number = halves * 0.5 - 0.25;
+    }
+    
+    if(longitude_number > 0) {
+        halves = (int)(longitude_number * 2 + 0.2);
+        longitude_number = halves * 0.5 + 0.25;
+    }
+    else {
+        halves = (int)(longitude_number * 2 - 0.2);
+        longitude_number = halves * 0.5 - 0.25;
+    }
+    latitude = [NSString stringWithFormat:@"%.2f", latitude_number];
+    longitude = [NSString stringWithFormat:@"%.2f", longitude_number];
+    
+    NSLog(@"rounded latitude and longitude strings are is %@, %@", latitude, longitude);
+
+    NSString *climate = [[climate_classification objectForKey:latitude] objectForKey:longitude];
+    NSLog(@"climate classification is: %@", climate);
+    //get climate mapping from  climate_class plist, codes dictionary
+    
+}
 
 - (void)dealloc
 {

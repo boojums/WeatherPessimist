@@ -11,7 +11,7 @@
 #define kJSONStringURL @"http://free.worldweatheronline.com/feed/weather.ashx?q=85711&format=json&num_of_days=2&key=be45236e98154106120808&includeLocation=yes"
 
 #define kJSONStringURLBeginning @"http://free.worldweatheronline.com/feed/weather.ashx?q="
-#define kJSONStringURLEnd @"&format=json&num_of_days=2&key=be45236e98154106120808"
+#define kJSONStringURLEnd @"&format=json&num_of_days=2&key=be45236e98154106120808&includeLocation=yes"
 
 
 #import "WeatherData.h"
@@ -59,7 +59,6 @@
 //class for holding current weather data? can be stored as object?
 //1. get current location
 //2. set up json fetch by lat/lon
-//3. determine ranges for different climate zones in lat/long
 
 - (void)viewDidLoad
 {
