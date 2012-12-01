@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		C29E16E1166A25C400C5B7BD /* climate_class.plist in Resources */ = {isa = PBXBuildFile; fileRef = C29E16E0166A25C400C5B7BD /* climate_class.plist */; };
 		C2A9EB58165C279700B8CAFA /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = C2A9EB57165C279700B8CAFA /* Default-568h@2x.png */; };
 		C2A9EB5C165E7E8F00B8CAFA /* WeatherData.m in Sources */ = {isa = PBXBuildFile; fileRef = C2A9EB5B165E7E8F00B8CAFA /* WeatherData.m */; };
 		C2DBD3F115DEDE650076104E /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C2DBD3F015DEDE650076104E /* UIKit.framework */; };
@@ -21,6 +22,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		C29E16E0166A25C400C5B7BD /* climate_class.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = climate_class.plist; sourceTree = "<group>"; };
 		C2A9EB57165C279700B8CAFA /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
 		C2A9EB5A165E7DFB00B8CAFA /* WeatherData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WeatherData.h; sourceTree = "<group>"; };
 		C2A9EB5B165E7E8F00B8CAFA /* WeatherData.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WeatherData.m; sourceTree = "<group>"; };
@@ -93,6 +95,7 @@
 				C2A9EB5A165E7DFB00B8CAFA /* WeatherData.h */,
 				C2A9EB5B165E7E8F00B8CAFA /* WeatherData.m */,
 				C2DBD40D15DF8E510076104E /* wxcodes.plist */,
+				C29E16E0166A25C400C5B7BD /* climate_class.plist */,
 				C2DBD3F715DEDE650076104E /* Supporting Files */,
 			);
 			path = WeatherPessimist;
@@ -165,6 +168,7 @@
 				C2DBD40415DEDE650076104E /* MainStoryboard.storyboard in Resources */,
 				C2DBD40E15DF8E510076104E /* wxcodes.plist in Resources */,
 				C2A9EB58165C279700B8CAFA /* Default-568h@2x.png in Resources */,
+				C29E16E1166A25C400C5B7BD /* climate_class.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
