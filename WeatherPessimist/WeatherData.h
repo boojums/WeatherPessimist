@@ -21,19 +21,19 @@
 
 
 //pressimistic climate variables here - as properties to synthesize
-//some kind of arrays instead?
+//single variable for current conditions, array for forecasted conditions (0 tomorrow, 1 next, etc)
 @property int     tempF;
 @property (strong, nonatomic) NSNumber *wind_mph;
 @property (strong, nonatomic) NSNumber *nextTemp;
 @property (strong, nonatomic) NSNumber *twoDayTemp;
 @property (strong, nonatomic) NSString *description;
 @property (strong, nonatomic) NSDateComponents   *dateComponents;
-//@property (strong, nonatomic) NSThing *thingName;
+@property (strong, nonatomic) NSString *imageName;
 
 -(id)initWithData:(NSDictionary *)jsondata;
 
 //if these are not in the interface but only implemented, then are they private?
-- (void)setClimateZoneByLat:(float)latititude andLong:(float)longitude;
+- (void)setClimateZoneByLatLong;
 - (void)setClimateZoneByZip:(NSNumber *)zipCode;
 
 - (void)pessimizeData;
@@ -45,6 +45,5 @@
 - (void)mountainWest;
 - (void)pacificNW;
 - (void)midatlantic;
-- (void)climateClassification;
 @end
 

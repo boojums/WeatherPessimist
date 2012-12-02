@@ -11,10 +11,12 @@
 
 /*
  To do list:
+- change climate zones to be more general
+- add climate zones mappings to climate_class.plist
 - get current location in lat/lon
 - enum for zone constants?
-- pessimized variables should just be a dictionary? of NSNumbers? one for each day
 - preferences screen/button
+- different leves of pessimism? slightly pessimistic just edges everything,
  */
 
 #define kNoClimateZone 0;
@@ -31,28 +33,28 @@
 
 @implementation WeatherData
 
-@synthesize tempF, nextTemp, wind_mph, twoDayTemp, description, dateComponents;
+@synthesize tempF, nextTemp, wind_mph, twoDayTemp, description, dateComponents, imageName;
 
 -(id)initWithData:(NSDictionary *)jsondata
 {
     self = [super init];
-    self->data = jsondata;
-    self->currentConditions = [[data objectForKey:@"current_condition"] objectAtIndex:0];
-    self->nextDayForecast = [[data objectForKey:@"weather"] objectAtIndex:0];
-    self->twoDayForecast = [[data objectForKey:@"weather"] objectAtIndex:1];
-    //this is only a zip code if the type of request was a zip code -- need to check request type
-    NSNumber *zip = [[[data objectForKey:@"request"] objectAtIndex:0] objectForKey:@"query"];
-    self->code = (NSString *)[currentConditions objectForKey:@"weatherCode"];
-    nearest_area = [[data objectForKey:@"nearest_area"] objectAtIndex:0];
-   
+    
     //Keys in jsondata are: weather, nearest_area, request, current_condition
     //current_condition has an array of one, which is a dictionary
     //weather is an array of two, nextDayForecast and twoDayForecast
+    data = jsondata;
+    currentConditions = [[data objectForKey:@"current_condition"] objectAtIndex:0];
+    nextDayForecast = [[data objectForKey:@"weather"] objectAtIndex:0];
+    twoDayForecast = [[data objectForKey:@"weather"] objectAtIndex:1];
+        
+    code = (NSString *)[currentConditions objectForKey:@"weatherCode"];
+    nearest_area = [[data objectForKey:@"nearest_area"] objectAtIndex:0];
+   
 
     //should this be an enum list?
     climateZoneMethods = [NSArray arrayWithObjects:@"none", @"desert", @"southeast", @"northeast", @"midwest", @"mountainWest", @"pacificNW", @"midatlantic", nil];
 
-    //get today's date -- should probably use date from weather request instead!
+    //get today's date -- should probably use date from weather request instead? need local date
     NSDate *today = [NSDate date];
     NSCalendar *gregorian = [[NSCalendar alloc]
                              initWithCalendarIdentifier:NSGregorianCalendar];
@@ -60,25 +62,31 @@
     
     if (self) {
         //if query was of type 'zip code'
-        [self setClimateZoneByZip:zip];
+        NSString *requestType = [[[data objectForKey:@"request"] objectAtIndex:0] objectForKey:@"type"];
+        if ([requestType isEqualToString:@"Zipcode"]){
+            NSNumber *zip = [[[data objectForKey:@"request"] objectAtIndex:0] objectForKey:@"query"];
+            [self setClimateZoneByZip:zip];
+        } else {
+            [self setClimateZoneByLatLong];
+        }
+        
         NSLog(@"climateZone set to %i, %@", climateZone, climateZoneMethods[climateZone]);
         
         //set codeDictionary to be dictionary for codes of climate zone
         NSString *plistPath = [[NSBundle mainBundle] pathForResource:@"wxcodes" ofType:@"plist"];
         //should check if plistPath is valid
-        NSDictionary *wxCodes = [NSDictionary dictionaryWithContentsOfFile:plistPath];
-        NSString *temp = climateZoneMethods[climateZone];
-        codeDictionary = [[wxCodes objectForKey:temp]
-                          objectForKey:code];
+       
+        codeDictionary = [NSDictionary dictionaryWithContentsOfFile:plistPath];
 
+        //DO NOT think that init should call pessimize -- this should be requested from the outside
         [self pessimizeData];
     }
 
-    [self climateClassification];
     return self;
  
 }
 
+//do I actually need to set it a zip code? should this be a public method?
 - (void) setClimateZoneByZip:(NSNumber *)zipCode
 {
     int zip = [zipCode intValue];
@@ -124,11 +132,48 @@
     climateZone = kNoClimateZone;
 }
 
-- (void) setClimateZoneByLat:(float)latititude andLong:(float)longitude
+//incomplete
+- (void) setClimateZoneByLatLong
 {
-    //round lat and long to nearest .25
-    //straight lookup of KÖPPEN-GEIGER classification
-    //map that to my own definitions
+    NSString *plistPath = [[NSBundle mainBundle] pathForResource:@"climate_class" ofType:@"plist"];
+    //should check if plistPath is valid
+    NSDictionary *climate_classification = [NSDictionary dictionaryWithContentsOfFile:plistPath];
+    NSString *latitude = [nearest_area objectForKey:@"latitude"];
+    NSString *longitude = [nearest_area objectForKey:@"longitude"];
+    
+    //NSLog(@"latitude and longitude are %@ and %@", latitude, longitude);
+    
+    float latitude_number = [latitude floatValue];
+    float longitude_number = [longitude floatValue];
+    
+    
+    //this is not perfect at all - roughly maps to closest .25 or .75
+    int halves;
+    if(latitude_number > 0) {
+        halves = (int)(latitude_number * 2 + 0.2);
+        latitude_number = halves * 0.5 + 0.25;
+    }
+    else {
+        halves = (int)(latitude_number * 2 - 0.2);
+        latitude_number = halves * 0.5 - 0.25;
+    }
+    
+    if(longitude_number > 0) {
+        halves = (int)(longitude_number * 2 + 0.2);
+        longitude_number = halves * 0.5 + 0.25;
+    }
+    else {
+        halves = (int)(longitude_number * 2 - 0.2);
+        longitude_number = halves * 0.5 - 0.25;
+    }
+    latitude = [NSString stringWithFormat:@"%.2f", latitude_number];
+    longitude = [NSString stringWithFormat:@"%.2f", longitude_number];
+    
+    //NSLog(@"rounded latitude and longitude strings are is %@, %@", latitude, longitude);
+    
+    NSString *climate = [[climate_classification objectForKey:latitude] objectForKey:longitude];
+    //NSLog(@"climate classification is: %@", climate);
+    //get climate mapping from  climate_class plist, codes dictionary
     
 }
 
@@ -138,18 +183,32 @@
 {
 
     //check for special zip code/date possibilities (tornado, hurricane, flood, super hot, plague, etc)
+    //if you've been checking a lot for same place, alert that it's not going to get better
     //have special date/location checks for holidays, red sox/yankees, etc.
     //alert sequence if it's *really* bad (super hot days in AZ, osv.) "Are you really sure you want to see this?"
    
     //set default description
     //randomized or incremented over time if multiple identical codes in a row
-    description = (NSString *)[[codeDictionary objectForKey:@"descriptions"]
-                               objectAtIndex:0];
+    description = (NSString *)[[[[codeDictionary objectForKey:climateZoneMethods[climateZone]]
+                                objectForKey:code]
+                                objectForKey:@"descriptions"]
+                                objectAtIndex:1];
+    
+    imageName = (NSString *)[[[codeDictionary objectForKey:climateZoneMethods[climateZone]]
+                                objectForKey:code]
+                                objectForKey:@"imageName"];
+    //NSLog(@"imageName from %d climate zone for code %@ is: %@.",climateZone, code, imageName);
+    if ([imageName length] == 0) {
+        imageName = (NSString *)[[[codeDictionary objectForKey:@"none"]
+                                  objectForKey:code]
+                                  objectForKey:@"imageName"];
+        NSLog(@"Using default image.");
+    }
+    
+   // NSLog(@"description for %@ code at %d: %@ with image name: %@", code, 1, description, imageName);
 
-    NSLog(@"description for %@ code at %d: %@", code, 0, description);
-
-    //should this be in the init method instead? **********************
-    //should be NSNumber?
+    //write a method to transfer all variables to the instance variables, call from init 
+    //should be NSNumber? not sure, don't think so
     tempF = [[currentConditions objectForKey:@"temp_F"] intValue];
     wind_mph = [currentConditions objectForKey:@"windspeedMiles"];
     nextTemp = [nextDayForecast objectForKey:@"tempMaxF"];
@@ -175,9 +234,6 @@
 
 - (void)desert
 {
-    //do crazy stuff to the pessimize the data
-    NSLog(@"desert called successfully");
-    
     //if temp is really high, alert saying, "weather forecast is bad enough already"
     if(tempF > 80)
         tempF += 10; //randomize for some variability
@@ -247,54 +303,10 @@
     
 }
 
-- (void)climateClassification
-{
-    NSString *plistPath = [[NSBundle mainBundle] pathForResource:@"climate_class" ofType:@"plist"];
-    //should check if plistPath is valid
-    NSDictionary *climate_classification = [NSDictionary dictionaryWithContentsOfFile:plistPath];
-    NSString *latitude = [nearest_area objectForKey:@"latitude"];
-    NSString *longitude = [nearest_area objectForKey:@"longitude"];
-
-    NSLog(@"latitude and longitude are %@ and %@", latitude, longitude);
-
-    float latitude_number = [latitude floatValue];
-    float longitude_number = [longitude floatValue];
-    
-    
-    //this is not perfect at all - roughly maps to closest .25 or .75
-    int halves;
-    if(latitude_number > 0) {
-        halves = (int)(latitude_number * 2 + 0.2);
-        latitude_number = halves * 0.5 + 0.25;
-    }
-    else {
-        halves = (int)(latitude_number * 2 - 0.2);
-        latitude_number = halves * 0.5 - 0.25;
-    }
-    
-    if(longitude_number > 0) {
-        halves = (int)(longitude_number * 2 + 0.2);
-        longitude_number = halves * 0.5 + 0.25;
-    }
-    else {
-        halves = (int)(longitude_number * 2 - 0.2);
-        longitude_number = halves * 0.5 - 0.25;
-    }
-    latitude = [NSString stringWithFormat:@"%.2f", latitude_number];
-    longitude = [NSString stringWithFormat:@"%.2f", longitude_number];
-    
-    NSLog(@"rounded latitude and longitude strings are is %@, %@", latitude, longitude);
-
-    NSString *climate = [[climate_classification objectForKey:latitude] objectForKey:longitude];
-    NSLog(@"climate classification is: %@", climate);
-    //get climate mapping from  climate_class plist, codes dictionary
-    
-}
 
 - (void)dealloc
 {
     
-//release as needed with [varName release];
 
 }
 

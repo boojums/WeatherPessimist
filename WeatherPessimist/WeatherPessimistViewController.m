@@ -51,15 +51,8 @@
 @end
 
 @implementation WeatherPessimistViewController
-@synthesize zipField;
-@synthesize currentLabel;
-@synthesize nextDayLabel;
-@synthesize twoDayLabel;
+@synthesize zipField, currentLabel, nextDayLabel, twoDayLabel, currentImage;
 @synthesize scrollView, pageControl;
-
-//class for holding current weather data? can be stored as object?
-//1. get current location
-//2. set up json fetch by lat/lon
 
 - (void)viewDidLoad
 {
@@ -77,6 +70,7 @@
     
     pageControlBeingUsed = NO;
     
+    //check preferences for number of days to show? 
     for (int i = 0; i < 2; i++) {
         CGRect frame;
         frame.origin.x = self.scrollView.frame.size.width * i;
@@ -89,30 +83,47 @@
     self.pageControl.currentPage = 0;
     self.pageControl.numberOfPages = 2;
     
+    //set single tap recognizer
+    UITapGestureRecognizer *singleTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(singleTapGestureCaptured:)];
+    [scrollView addGestureRecognizer:singleTap];
     
 }
 
 //called once data has been retrieved from web - should be bg thread if large file to be parsed
 - (void)fetchedData:(NSDictionary *)responseData {
     
-    // TODO: check if returned data is NULL; alert and abort if so
     NSDictionary *data = [responseData objectForKey:@"data"];
+    if ((data == NULL) || ([data objectForKey:@"error"])){
+        UIAlertView *alert = [[UIAlertView alloc]
+                              initWithTitle: @"No weather!"
+                              message:@"We're having trouble getting your forecast!"
+                              delegate:nil
+                              cancelButtonTitle:@"Bummer"
+                              otherButtonTitles:nil, nil];
+        [alert show];
+        zipField.text = @"";
+        return;
+    }
+       
 
     //need proper construction/destruction of weatherData objects
     WeatherData *weatherData = [[WeatherData alloc] initWithData:data];
 
-    //update labels with weatherData pessimized data
-    currentLabel.numberOfLines = 0;
-    currentLabel.text = [NSString stringWithFormat:@"temperature:%d\n windspeed: %@ \n conditions: %@", weatherData.tempF, weatherData.wind_mph, weatherData.description];
+    //update labels with weatherData pessimized data -- array for forecasted data?
+    currentLabel.numberOfLines = 0; 
+    currentLabel.text = [NSString stringWithFormat:@"%@\n%d°F\n%@ mph", weatherData.description, weatherData.tempF, weatherData.wind_mph];
     
     nextDayLabel.text = [NSString stringWithFormat:@"Tomorrow will be %@°F", weatherData.nextTemp];
    
     twoDayLabel.text = [NSString stringWithFormat:@"The next day will be %@°F", weatherData.twoDayTemp];
+    
+    currentImage.image = [UIImage imageNamed:weatherData.imageName];
+    
 
 }
 
 - (IBAction)buttonPushed {
-    [zipField resignFirstResponder]; //put keyboard away
+    [zipField resignFirstResponder];       //put keyboard away
     NSString *toScan = zipField.text;     //add support for city, state also?
     
     // strip zipField text down to just decimal digits
@@ -129,6 +140,7 @@
                               cancelButtonTitle:@"Ok"
                               otherButtonTitles:nil, nil];
         [alert show];
+        [zipField becomeFirstResponder];
         return;
     }
     
@@ -142,6 +154,7 @@
                               cancelButtonTitle:@"Ok"
                               otherButtonTitles:nil, nil];
         [alert show];
+        [zipField becomeFirstResponder];
         return;
     }
     
@@ -168,7 +181,7 @@
     NSDictionary *result = [NSDictionary dictionaryWithContentsOfJSONURLString:urlString];
     [self fetchedData:result];
     
-    //store currently fetched data
+    //store currently fetched data - why not store all of it?
     [prefs setObject:[NSDate date] forKey:@"lastUpdate"];
     [prefs setObject:zipNum forKey:@"enteredZip"];
     [prefs synchronize];
@@ -180,7 +193,6 @@
 		CGFloat pageWidth = self.scrollView.frame.size.width;
 		int page = floor((self.scrollView.contentOffset.x - pageWidth / 2) / pageWidth) + 1;
 		self.pageControl.currentPage = page;
-        NSLog(@"current page = %d", page);
 	}
 }
 
@@ -226,6 +238,12 @@
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
     return (interfaceOrientation != UIInterfaceOrientationPortraitUpsideDown);
+}
+
+- (void)singleTapGestureCaptured:(UITapGestureRecognizer *)gesture
+{
+    //CGPoint touchPoint=[gesture locationInView:scrollView];
+    [zipField resignFirstResponder];
 }
 
 -(IBAction)backgroundTouched:(id)sender {
