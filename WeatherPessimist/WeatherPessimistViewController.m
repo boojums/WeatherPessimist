@@ -111,11 +111,11 @@
 
     //update labels with weatherData pessimized data -- array for forecasted data?
     currentLabel.numberOfLines = 0; 
-    currentLabel.text = [NSString stringWithFormat:@"%@\n%d°F\n%@ mph", weatherData.description, weatherData.tempF, weatherData.wind_mph];
+    currentLabel.text = [NSString stringWithFormat:@"%@\n%d°F\n%dmph", weatherData.description, weatherData.tempF, weatherData.wind_mph];
     
-    nextDayLabel.text = [NSString stringWithFormat:@"Tomorrow will be %@°F", weatherData.nextTemp];
+    nextDayLabel.text = [NSString stringWithFormat:@"Tomorrow will be %@°F", weatherData.forecastMaxTempsF[0]];
    
-    twoDayLabel.text = [NSString stringWithFormat:@"The next day will be %@°F", weatherData.twoDayTemp];
+    twoDayLabel.text = [NSString stringWithFormat:@"The next day will be %@°F", weatherData.forecastMaxTempsF[1]];
     
     currentImage.image = [UIImage imageNamed:weatherData.imageName];
     

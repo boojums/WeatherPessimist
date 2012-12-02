@@ -17,15 +17,17 @@
     NSDictionary    *nearest_area;
     NSString        *code;
     NSDictionary    *codeDictionary;
+    NSArray         *zoneDescriptions;
 }
 
 
 //pressimistic climate variables here - as properties to synthesize
 //single variable for current conditions, array for forecasted conditions (0 tomorrow, 1 next, etc)
-@property int     tempF;
-@property (strong, nonatomic) NSNumber *wind_mph;
-@property (strong, nonatomic) NSNumber *nextTemp;
-@property (strong, nonatomic) NSNumber *twoDayTemp;
+@property int           tempF;
+@property int           wind_mph;
+@property (strong, nonatomic) NSMutableArray *forecastMaxTempsF;
+@property (strong, nonatomic) NSMutableArray *forecastMinTempsF;
+@property (strong, nonatomic) NSMutableArray *forecastWindsM;
 @property (strong, nonatomic) NSString *description;
 @property (strong, nonatomic) NSDateComponents   *dateComponents;
 @property (strong, nonatomic) NSString *imageName;

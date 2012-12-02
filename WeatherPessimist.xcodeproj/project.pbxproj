@@ -16,6 +16,7 @@
 		C28DF8F6166B793100A56DA2 /* 114icon.png in Resources */ = {isa = PBXBuildFile; fileRef = C28DF8F5166B793100A56DA2 /* 114icon.png */; };
 		C28DF8F8166B7F1300A56DA2 /* Default.png in Resources */ = {isa = PBXBuildFile; fileRef = C28DF8F7166B7F1300A56DA2 /* Default.png */; };
 		C28DF8FA166B7F1500A56DA2 /* Default@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = C28DF8F9166B7F1500A56DA2 /* Default@2x.png */; };
+		C28DF8FC166BF6E900A56DA2 /* wxcodes.plist in Resources */ = {isa = PBXBuildFile; fileRef = C28DF8FB166BF6E900A56DA2 /* wxcodes.plist */; };
 		C29E16E1166A25C400C5B7BD /* climate_class.plist in Resources */ = {isa = PBXBuildFile; fileRef = C29E16E0166A25C400C5B7BD /* climate_class.plist */; };
 		C29E171F166A9A7200C5B7BD /* melting_sun.png in Resources */ = {isa = PBXBuildFile; fileRef = C29E171E166A9A7200C5B7BD /* melting_sun.png */; };
 		C29E1721166A9FFF00C5B7BD /* sad_rain.png in Resources */ = {isa = PBXBuildFile; fileRef = C29E1720166A9FFF00C5B7BD /* sad_rain.png */; };
@@ -29,7 +30,7 @@
 		C2DBD40115DEDE650076104E /* WeatherPessimistAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = C2DBD40015DEDE650076104E /* WeatherPessimistAppDelegate.m */; };
 		C2DBD40415DEDE650076104E /* MainStoryboard.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C2DBD40215DEDE650076104E /* MainStoryboard.storyboard */; };
 		C2DBD40715DEDE650076104E /* WeatherPessimistViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = C2DBD40615DEDE650076104E /* WeatherPessimistViewController.m */; };
-		C2DBD40E15DF8E510076104E /* wxcodes.plist in Resources */ = {isa = PBXBuildFile; fileRef = C2DBD40D15DF8E510076104E /* wxcodes.plist */; };
+		C2DBD40E15DF8E510076104E /* old_wxcodes.plist in Resources */ = {isa = PBXBuildFile; fileRef = C2DBD40D15DF8E510076104E /* old_wxcodes.plist */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -42,6 +43,7 @@
 		C28DF8F5166B793100A56DA2 /* 114icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = 114icon.png; sourceTree = "<group>"; };
 		C28DF8F7166B7F1300A56DA2 /* Default.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Default.png; sourceTree = "<group>"; };
 		C28DF8F9166B7F1500A56DA2 /* Default@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default@2x.png"; sourceTree = "<group>"; };
+		C28DF8FB166BF6E900A56DA2 /* wxcodes.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = wxcodes.plist; sourceTree = "<group>"; };
 		C29E16E0166A25C400C5B7BD /* climate_class.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = climate_class.plist; sourceTree = "<group>"; };
 		C29E171E166A9A7200C5B7BD /* melting_sun.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = melting_sun.png; sourceTree = "<group>"; };
 		C29E1720166A9FFF00C5B7BD /* sad_rain.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = sad_rain.png; sourceTree = "<group>"; };
@@ -61,7 +63,7 @@
 		C2DBD40315DEDE650076104E /* en */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = en; path = en.lproj/MainStoryboard.storyboard; sourceTree = "<group>"; };
 		C2DBD40515DEDE650076104E /* WeatherPessimistViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WeatherPessimistViewController.h; sourceTree = "<group>"; };
 		C2DBD40615DEDE650076104E /* WeatherPessimistViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = WeatherPessimistViewController.m; sourceTree = "<group>"; };
-		C2DBD40D15DF8E510076104E /* wxcodes.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = wxcodes.plist; sourceTree = "<group>"; };
+		C2DBD40D15DF8E510076104E /* old_wxcodes.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = old_wxcodes.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -134,7 +136,8 @@
 				C2DBD40615DEDE650076104E /* WeatherPessimistViewController.m */,
 				C2A9EB5A165E7DFB00B8CAFA /* WeatherData.h */,
 				C2A9EB5B165E7E8F00B8CAFA /* WeatherData.m */,
-				C2DBD40D15DF8E510076104E /* wxcodes.plist */,
+				C2DBD40D15DF8E510076104E /* old_wxcodes.plist */,
+				C28DF8FB166BF6E900A56DA2 /* wxcodes.plist */,
 				C29E16E0166A25C400C5B7BD /* climate_class.plist */,
 				C29E171D166A998700C5B7BD /* Images */,
 				C2DBD3F715DEDE650076104E /* Supporting Files */,
@@ -207,7 +210,7 @@
 			files = (
 				C2DBD3FB15DEDE650076104E /* InfoPlist.strings in Resources */,
 				C2DBD40415DEDE650076104E /* MainStoryboard.storyboard in Resources */,
-				C2DBD40E15DF8E510076104E /* wxcodes.plist in Resources */,
+				C2DBD40E15DF8E510076104E /* old_wxcodes.plist in Resources */,
 				C2A9EB58165C279700B8CAFA /* Default-568h@2x.png in Resources */,
 				C29E16E1166A25C400C5B7BD /* climate_class.plist in Resources */,
 				C29E171F166A9A7200C5B7BD /* melting_sun.png in Resources */,
@@ -221,6 +224,7 @@
 				C28DF8F6166B793100A56DA2 /* 114icon.png in Resources */,
 				C28DF8F8166B7F1300A56DA2 /* Default.png in Resources */,
 				C28DF8FA166B7F1500A56DA2 /* Default@2x.png in Resources */,
+				C28DF8FC166BF6E900A56DA2 /* wxcodes.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -33,7 +33,7 @@
 
 @implementation WeatherData
 
-@synthesize tempF, nextTemp, wind_mph, twoDayTemp, description, dateComponents, imageName;
+@synthesize tempF, wind_mph, description, dateComponents, imageName, forecastMaxTempsF;
 
 -(id)initWithData:(NSDictionary *)jsondata
 {
@@ -42,23 +42,23 @@
     //Keys in jsondata are: weather, nearest_area, request, current_condition
     //current_condition has an array of one, which is a dictionary
     //weather is an array of two, nextDayForecast and twoDayForecast
-    data = jsondata;
-    currentConditions = [[data objectForKey:@"current_condition"] objectAtIndex:0];
-    nextDayForecast = [[data objectForKey:@"weather"] objectAtIndex:0];
-    twoDayForecast = [[data objectForKey:@"weather"] objectAtIndex:1];
+    self->data = jsondata;
+    self->currentConditions = [[data objectForKey:@"current_condition"] objectAtIndex:0];
+    self->nextDayForecast = [[data objectForKey:@"weather"] objectAtIndex:0];
+    self->twoDayForecast = [[data objectForKey:@"weather"] objectAtIndex:1];
         
-    code = (NSString *)[currentConditions objectForKey:@"weatherCode"];
-    nearest_area = [[data objectForKey:@"nearest_area"] objectAtIndex:0];
+    self->code = (NSString *)[currentConditions objectForKey:@"weatherCode"];
+    self->nearest_area = [[data objectForKey:@"nearest_area"] objectAtIndex:0];
    
 
     //should this be an enum list?
-    climateZoneMethods = [NSArray arrayWithObjects:@"none", @"desert", @"southeast", @"northeast", @"midwest", @"mountainWest", @"pacificNW", @"midatlantic", nil];
+    self->climateZoneMethods = [NSArray arrayWithObjects:@"none", @"desert", @"southeast", @"northeast", @"midwest", @"mountainWest", @"pacificNW", @"midatlantic", nil];
 
     //get today's date -- should probably use date from weather request instead? need local date
     NSDate *today = [NSDate date];
     NSCalendar *gregorian = [[NSCalendar alloc]
                              initWithCalendarIdentifier:NSGregorianCalendar];
-    dateComponents = [gregorian components:NSMonthCalendarUnit fromDate:today];
+    self->dateComponents = [gregorian components:NSMonthCalendarUnit fromDate:today];
     
     if (self) {
         //if query was of type 'zip code'
@@ -76,7 +76,11 @@
         NSString *plistPath = [[NSBundle mainBundle] pathForResource:@"wxcodes" ofType:@"plist"];
         //should check if plistPath is valid
        
-        codeDictionary = [NSDictionary dictionaryWithContentsOfFile:plistPath];
+        self->codeDictionary = [NSDictionary dictionaryWithContentsOfFile:plistPath];
+        self->zoneDescriptions = [[[codeDictionary objectForKey:climateZoneMethods[climateZone]]
+                                        objectForKey:code]
+                                        objectForKey:@"descriptions"];
+        self->description = (NSString *)zoneDescriptions[0]; //default description
 
         //DO NOT think that init should call pessimize -- this should be requested from the outside
         [self pessimizeData];
@@ -187,14 +191,13 @@
     //have special date/location checks for holidays, red sox/yankees, etc.
     //alert sequence if it's *really* bad (super hot days in AZ, osv.) "Are you really sure you want to see this?"
    
-    //set default description
-    //randomized or incremented over time if multiple identical codes in a row
-    description = (NSString *)[[[[codeDictionary objectForKey:climateZoneMethods[climateZone]]
-                                objectForKey:code]
-                                objectForKey:@"descriptions"]
-                                objectAtIndex:1];
+    int count = [zoneDescriptions count];
+    if (count > 0) {
+        int num = arc4random() % (count-1) + 1;
+        self.description = (NSString *)zoneDescriptions[num];
+    }
     
-    imageName = (NSString *)[[[codeDictionary objectForKey:climateZoneMethods[climateZone]]
+    self->imageName = (NSString *)[[[codeDictionary objectForKey:climateZoneMethods[climateZone]]
                                 objectForKey:code]
                                 objectForKey:@"imageName"];
     //NSLog(@"imageName from %d climate zone for code %@ is: %@.",climateZone, code, imageName);
@@ -209,12 +212,13 @@
 
     //write a method to transfer all variables to the instance variables, call from init 
     //should be NSNumber? not sure, don't think so
-    tempF = [[currentConditions objectForKey:@"temp_F"] intValue];
-    wind_mph = [currentConditions objectForKey:@"windspeedMiles"];
-    nextTemp = [nextDayForecast objectForKey:@"tempMaxF"];
-    twoDayTemp = [twoDayForecast objectForKey:@"tempMaxF"];
+    self.tempF = [[currentConditions objectForKey:@"temp_F"] intValue];
+    self.wind_mph = [[currentConditions objectForKey:@"windspeedMiles"] intValue];
     
-    
+    self.forecastMaxTempsF = [[NSMutableArray alloc] initWithObjects:
+                        [nextDayForecast objectForKey:@"tempMaxF"],
+                        [twoDayForecast objectForKey:@"tempMaxF"], nil];
+
     //call the special pessimizer function based on the climate zone
     SEL s = NSSelectorFromString(self->climateZoneMethods[climateZone]);
 #pragma clang diagnostic push
@@ -234,11 +238,13 @@
 
 - (void)desert
 {
-    //if temp is really high, alert saying, "weather forecast is bad enough already"
-    if(tempF > 80)
+    
+    if((tempF > 80) || (tempF < 1067))
         tempF += 10; //randomize for some variability
     else if(tempF < 40)
         tempF -= 10;
+    else if(tempF > 106)
+        self.description = @"Hot. I didn't even have to exaggerate.";
     
     //if monsoon season, and humidity is reasonably high, make it higher with no rain
     if ((dateComponents.month > 6) && (dateComponents.month < 10))
@@ -249,14 +255,14 @@
         }
     
     //wind
-    switch ([wind_mph integerValue]) {
+    switch (wind_mph) {
         case 0:
-            wind_mph = [NSNumber numberWithInt:[wind_mph intValue] + 7];
+            wind_mph += 7;
             break;
         case 10:
-            wind_mph = [NSNumber numberWithInt:[wind_mph intValue] + 15];
+            wind_mph += 15;
         default:
-            wind_mph = [NSNumber numberWithInt:[wind_mph intValue] + 7];
+            wind_mph += 7;
             break;
     }
 }
