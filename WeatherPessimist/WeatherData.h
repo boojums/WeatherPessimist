@@ -9,7 +9,7 @@
 @interface WeatherData : NSObject
 {
     int             climateZone;
-    NSArray         *climateZoneMethods;
+    NSArray         *climateZoneNames;
     NSDictionary    *data;
     NSDictionary    *currentConditions;
     NSDictionary    *nextDayForecast;
@@ -21,9 +21,9 @@
 }
 
 
-//pressimistic climate variables here - as properties to synthesize
+//pressimistic climate variables here - as properties
 //single variable for current conditions, array for forecasted conditions (0 tomorrow, 1 next, etc)
-@property int           tempF;
+@property int           tempF; // should probably all be NSNumbers for consistency with later
 @property int           wind_mph;
 @property (strong, nonatomic) NSMutableArray *forecastMaxTempsF;
 @property (strong, nonatomic) NSMutableArray *forecastMinTempsF;

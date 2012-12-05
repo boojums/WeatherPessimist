@@ -51,8 +51,10 @@
 @end
 
 @implementation WeatherPessimistViewController
-@synthesize zipField, currentLabel, nextDayLabel, twoDayLabel, currentImage;
+@synthesize zipField, currentLabel, nextDayLabel, twoDayLabel, currentImage, updatedLabel;
 @synthesize scrollView, pageControl;
+@synthesize locationManager, currentLocation;
+
 
 - (void)viewDidLoad
 {
@@ -62,6 +64,12 @@
     //check if connected to internet
     //if needed, use cached information first
     //if time to refresh, use location finder or default zip code
+
+    locationManager = [[CLLocationManager alloc] init];
+    locationManager.desiredAccuracy = kCLLocationAccuracyThreeKilometers;
+    locationManager.delegate = self;
+    [locationManager startUpdatingLocation];
+    currentLocation = nil;
     
     //create background queue, fetch data in the background based on last zip code
     dispatch_async(kBgQueue, ^{
@@ -105,8 +113,6 @@
         return;
     }
        
-
-    //need proper construction/destruction of weatherData objects
     WeatherData *weatherData = [[WeatherData alloc] initWithData:data];
 
     //update labels with weatherData pessimized data -- array for forecasted data?
@@ -119,13 +125,33 @@
     
     currentImage.image = [UIImage imageNamed:weatherData.imageName];
     
-
+    //needs date formatting with NSDateFormatter
+    updatedLabel.text = [NSString stringWithFormat:@"Last Updated: %@", [NSDate date]];
 }
 
-- (IBAction)buttonPushed {
+- (IBAction)buttonPushed
+{
+    NSLog(@"buttonPushed");
     [zipField resignFirstResponder];       //put keyboard away
-    NSString *toScan = zipField.text;     //add support for city, state also?
+    NSString *toScan = zipField.text;     //add support for city, state, etc.
     
+    if(zipField.text.length == 0)
+    {
+        //lat.xx,long.xx
+        NSString *latitude = [NSString stringWithFormat:@"%+.2f",
+                                     self.currentLocation.coordinate.latitude];
+        
+        NSString *longitude = [NSString stringWithFormat:@"%+.2f",
+                                      self.currentLocation.coordinate.longitude];
+        
+        NSString *urlString = [NSString stringWithFormat:@"%@%@%@%@",kJSONStringURLBeginning, latitude, longitude, kJSONStringURLEnd];
+        
+        NSDictionary *result = [NSDictionary dictionaryWithContentsOfJSONURLString:urlString];
+        [self fetchedData:result];
+        return;
+    }
+    
+    // need separate method for retrieving by search rather than current location
     // strip zipField text down to just decimal digits
     NSScanner *s = [NSScanner scannerWithString:toScan];
     NSString *zipString;
@@ -224,6 +250,32 @@
     return 1;
 }
 
+#pragma mark -
+#pragma mark CLLocationManager delegate methods
+-(void)locationManager:(CLLocationManager *)manager
+        didUpdateToLocation:(CLLocation *)newLocation
+        fromLocation:(CLLocation *)oldLocation
+{
+    //NSLog(@"current latitude: %@\ncurrent longitude: %@", currentLatitude, currentLongitude);
+    
+    //other information available, like accuracy, altitude, etc.
+    
+    //if(currentLocation == nil)
+        currentLocation = newLocation;
+
+}
+
+-(void)locationManager:(CLLocationManager *)manager
+      didFailWithError:(NSError *)error
+{
+    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"oops!"
+                                                    message:@"Can't get location information!" delegate:nil
+                                          cancelButtonTitle:@"Okay"
+                                          otherButtonTitles:nil, nil];
+    [alert show];
+    return;
+}
+
 - (void)viewDidUnload {
     [self setZipField:nil];
     [self setCurrentLabel:nil];
@@ -232,14 +284,21 @@
     self.scrollView = nil;
     self.pageControl = nil;
 
+    [self setUpdatedLabel:nil];
     [super viewDidUnload];
     // Release any retained subviews of the main view.
 }
 
+//deprecated in iOS6
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
     return (interfaceOrientation != UIInterfaceOrientationPortraitUpsideDown);
 }
+//for iOS6
+- (NSUInteger)supportedInterfaceOrientations {
+    return UIInterfaceOrientationMaskPortrait;
+}
 
+//this causes problems with iOS5.1!
 - (void)singleTapGestureCaptured:(UITapGestureRecognizer *)gesture
 {
     //CGPoint touchPoint=[gesture locationInView:scrollView];

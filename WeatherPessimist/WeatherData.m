@@ -51,8 +51,7 @@
     self->nearest_area = [[data objectForKey:@"nearest_area"] objectAtIndex:0];
    
 
-    //should this be an enum list?
-    self->climateZoneMethods = [NSArray arrayWithObjects:@"none", @"desert", @"southeast", @"northeast", @"midwest", @"mountainWest", @"pacificNW", @"midatlantic", nil];
+    self->climateZoneNames = [NSArray arrayWithObjects:@"none", @"desert", @"southeast", @"northeast", @"midwest", @"mountainWest", @"pacificNW", @"midatlantic", nil];
 
     //get today's date -- should probably use date from weather request instead? need local date
     NSDate *today = [NSDate date];
@@ -70,14 +69,14 @@
             [self setClimateZoneByLatLong];
         }
         
-        NSLog(@"climateZone set to %i, %@", climateZone, climateZoneMethods[climateZone]);
+        NSLog(@"climateZone set to %i, %@", climateZone, climateZoneNames[climateZone]);
         
         //set codeDictionary to be dictionary for codes of climate zone
         NSString *plistPath = [[NSBundle mainBundle] pathForResource:@"wxcodes" ofType:@"plist"];
         //should check if plistPath is valid
        
         self->codeDictionary = [NSDictionary dictionaryWithContentsOfFile:plistPath];
-        self->zoneDescriptions = [[[codeDictionary objectForKey:climateZoneMethods[climateZone]]
+        self->zoneDescriptions = [[[codeDictionary objectForKey:climateZoneNames[climateZone]]
                                         objectForKey:code]
                                         objectForKey:@"descriptions"];
         self->description = (NSString *)zoneDescriptions[0]; //default description
@@ -147,36 +146,31 @@
     
     //NSLog(@"latitude and longitude are %@ and %@", latitude, longitude);
     
-    float latitude_number = [latitude floatValue];
-    float longitude_number = [longitude floatValue];
+    float latitude_float = [latitude floatValue];
+    float longitude_float = [longitude floatValue];
     
     
-    //this is not perfect at all - roughly maps to closest .25 or .75
+    //round lat lon to the nearest .25 or .75 for reading off the table
     int halves;
-    if(latitude_number > 0) {
-        halves = (int)(latitude_number * 2 + 0.2);
-        latitude_number = halves * 0.5 + 0.25;
-    }
-    else {
-        halves = (int)(latitude_number * 2 - 0.2);
-        latitude_number = halves * 0.5 - 0.25;
-    }
+    halves = (int)(latitude_float * 2);
+    if(latitude_float > 0)
+        latitude_float = halves * 0.5 + 0.25;
+    else
+        latitude_float = halves * 0.5 - 0.25;
     
-    if(longitude_number > 0) {
-        halves = (int)(longitude_number * 2 + 0.2);
-        longitude_number = halves * 0.5 + 0.25;
-    }
-    else {
-        halves = (int)(longitude_number * 2 - 0.2);
-        longitude_number = halves * 0.5 - 0.25;
-    }
-    latitude = [NSString stringWithFormat:@"%.2f", latitude_number];
-    longitude = [NSString stringWithFormat:@"%.2f", longitude_number];
+    halves = (int)(longitude_float * 2);
+    if(longitude_float > 0)
+        longitude_float = halves * 0.5 + 0.25;
+    else
+        longitude_float = halves * 0.5 - 0.25;
+                   
+    latitude = [NSString stringWithFormat:@"%.2f", latitude_float];
+    longitude = [NSString stringWithFormat:@"%.2f", longitude_float];
     
     //NSLog(@"rounded latitude and longitude strings are is %@, %@", latitude, longitude);
     
     NSString *climate = [[climate_classification objectForKey:latitude] objectForKey:longitude];
-    //NSLog(@"climate classification is: %@", climate);
+    NSLog(@"climate classification is: %@", climate);
     //get climate mapping from  climate_class plist, codes dictionary
     
 }
@@ -192,23 +186,23 @@
     //alert sequence if it's *really* bad (super hot days in AZ, osv.) "Are you really sure you want to see this?"
    
     int count = [zoneDescriptions count];
-    if (count > 0) {
+    if (count > 1) {
+        //consider using filtered predicate loading of array- summmer/winter/etc
         int num = arc4random() % (count-1) + 1;
         self.description = (NSString *)zoneDescriptions[num];
     }
     
-    self->imageName = (NSString *)[[[codeDictionary objectForKey:climateZoneMethods[climateZone]]
+    self->imageName = (NSString *)[[[codeDictionary objectForKey:climateZoneNames[climateZone]]
                                 objectForKey:code]
                                 objectForKey:@"imageName"];
-    //NSLog(@"imageName from %d climate zone for code %@ is: %@.",climateZone, code, imageName);
+
     if ([imageName length] == 0) {
         imageName = (NSString *)[[[codeDictionary objectForKey:@"none"]
                                   objectForKey:code]
                                   objectForKey:@"imageName"];
         NSLog(@"Using default image.");
     }
-    
-   // NSLog(@"description for %@ code at %d: %@ with image name: %@", code, 1, description, imageName);
+
 
     //write a method to transfer all variables to the instance variables, call from init 
     //should be NSNumber? not sure, don't think so
@@ -220,7 +214,7 @@
                         [twoDayForecast objectForKey:@"tempMaxF"], nil];
 
     //call the special pessimizer function based on the climate zone
-    SEL s = NSSelectorFromString(self->climateZoneMethods[climateZone]);
+    SEL s = NSSelectorFromString(self->climateZoneNames[climateZone]);
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Warc-performSelector-leaks"
     [self performSelector:s];
@@ -239,12 +233,12 @@
 - (void)desert
 {
     
-    if((tempF > 80) || (tempF < 1067))
+    if((tempF > 80) || (tempF < 107))
         tempF += 10; //randomize for some variability
     else if(tempF < 40)
         tempF -= 10;
     else if(tempF > 106)
-        self.description = @"Hot. I didn't even have to exaggerate.";
+        self.description = @"Hot. I didn't even have to exaggerate."; //randomize
     
     //if monsoon season, and humidity is reasonably high, make it higher with no rain
     if ((dateComponents.month > 6) && (dateComponents.month < 10))
@@ -278,6 +272,8 @@
 
 - (void)northeast
 {
+    //write ifSchoolDay method
+    //if snow predicted, check whether tomorrow is a school day, msg 'snow but no snow day'
     
 }
 

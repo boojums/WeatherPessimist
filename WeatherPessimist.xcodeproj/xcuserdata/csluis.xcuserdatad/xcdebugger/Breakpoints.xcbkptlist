@@ -18,25 +18,12 @@
          shouldBeEnabled = "No"
          ignoreCount = "0"
          continueAfterRunningActions = "No"
-         filePath = "WeatherPessimist/WeatherPessimistViewController.m"
-         timestampString = "376147193.535698"
-         startingColumnNumber = "9223372036854775807"
-         endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "110"
-         endingLineNumber = "110"
-         landmarkName = "-fetchedData:"
-         landmarkType = "5">
-      </FileBreakpoint>
-      <FileBreakpoint
-         shouldBeEnabled = "No"
-         ignoreCount = "0"
-         continueAfterRunningActions = "No"
          filePath = "WeatherPessimist/WeatherData.m"
-         timestampString = "376175930.108936"
+         timestampString = "376261545.555782"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "258"
-         endingLineNumber = "258"
+         startingLineNumber = "250"
+         endingLineNumber = "250"
          landmarkName = "-desert"
          landmarkType = "5">
       </FileBreakpoint>
@@ -45,11 +32,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "WeatherPessimist/WeatherData.m"
-         timestampString = "376175930.108936"
+         timestampString = "376261545.555782"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "259"
-         endingLineNumber = "259"
+         startingLineNumber = "251"
+         endingLineNumber = "251"
          landmarkName = "-desert"
          landmarkType = "5">
       </FileBreakpoint>
@@ -58,11 +45,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "WeatherPessimist/WeatherData.m"
-         timestampString = "376175930.108936"
+         timestampString = "376261545.555782"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "215"
-         endingLineNumber = "215"
+         startingLineNumber = "214"
+         endingLineNumber = "214"
          landmarkName = "-pessimizeData"
          landmarkType = "5">
       </FileBreakpoint>
@@ -71,12 +58,64 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "WeatherPessimist/WeatherPessimistViewController.m"
-         timestampString = "376154938.605561"
+         timestampString = "376439758.423669"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "114"
-         endingLineNumber = "114"
+         startingLineNumber = "123"
+         endingLineNumber = "123"
          landmarkName = "-fetchedData:"
+         landmarkType = "5">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "No"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         filePath = "WeatherPessimist/WeatherData.m"
+         timestampString = "376302439.095977"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "192"
+         endingLineNumber = "192"
+         landmarkName = "-pessimizeData"
+         landmarkType = "5">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "No"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         filePath = "WeatherPessimist/WeatherData.m"
+         timestampString = "376302440.045737"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "193"
+         endingLineNumber = "193"
+         landmarkName = "-pessimizeData"
+         landmarkType = "5">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "No"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         filePath = "WeatherPessimist/WeatherPessimistViewController.m"
+         timestampString = "376440290.836433"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "146"
+         endingLineNumber = "146"
+         landmarkName = "-buttonPushed"
+         landmarkType = "5">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "No"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         filePath = "WeatherPessimist/WeatherPessimistViewController.m"
+         timestampString = "376440290.836433"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "147"
+         endingLineNumber = "147"
+         landmarkName = "-buttonPushed"
          landmarkType = "5">
       </FileBreakpoint>
    </FileBreakpoints>
