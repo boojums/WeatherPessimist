@@ -65,11 +65,11 @@
     //if needed, use cached information first
     //if time to refresh, use location finder or default zip code
 
-    locationManager = [[CLLocationManager alloc] init];
-    locationManager.desiredAccuracy = kCLLocationAccuracyThreeKilometers;
-    locationManager.delegate = self;
+    self.locationManager = [[CLLocationManager alloc] init];
+    self.locationManager.desiredAccuracy = kCLLocationAccuracyThreeKilometers;
+    self.locationManager.delegate = self;
     [locationManager startUpdatingLocation];
-    currentLocation = nil;
+    self.currentLocation = nil;
     
     //create background queue, fetch data in the background based on last zip code
     dispatch_async(kBgQueue, ^{
@@ -116,27 +116,27 @@
     WeatherData *weatherData = [[WeatherData alloc] initWithData:data];
 
     //update labels with weatherData pessimized data -- array for forecasted data?
-    currentLabel.numberOfLines = 0; 
-    currentLabel.text = [NSString stringWithFormat:@"%@\n%d°F\n%dmph", weatherData.description, weatherData.tempF, weatherData.wind_mph];
+    self.currentLabel.numberOfLines = 0;
+    self.currentLabel.text = [NSString stringWithFormat:@"%@\n%d°F\n%dmph", weatherData.description, weatherData.tempF, weatherData.wind_mph];
     
-    nextDayLabel.text = [NSString stringWithFormat:@"Tomorrow will be %@°F", weatherData.forecastMaxTempsF[0]];
+    self.nextDayLabel.text = [NSString stringWithFormat:@"Tomorrow will be %@°F", weatherData.forecastMaxTempsF[0]];
    
-    twoDayLabel.text = [NSString stringWithFormat:@"The next day will be %@°F", weatherData.forecastMaxTempsF[1]];
+    self.twoDayLabel.text = [NSString stringWithFormat:@"The next day will be %@°F", weatherData.forecastMaxTempsF[1]];
     
-    currentImage.image = [UIImage imageNamed:weatherData.imageName];
+    self.currentImage.image = [UIImage imageNamed:weatherData.imageName];
     
     //needs date formatting with NSDateFormatter
-    updatedLabel.text = [NSString stringWithFormat:@"Last Updated: %@", [NSDate date]];
+    self.updatedLabel.text = [NSString stringWithFormat:@"Last Updated: %@", [NSDate date]];
 }
 
+//rename to something descriptive about what it does
 - (IBAction)buttonPushed
 {
     NSLog(@"buttonPushed");
-    [zipField resignFirstResponder];       //put keyboard away
+    [zipField resignFirstResponder];       
     NSString *toScan = zipField.text;     //add support for city, state, etc.
     
-    if(zipField.text.length == 0)
-    {
+    if(self.zipField.text.length == 0) {
         //lat.xx,long.xx
         NSString *latitude = [NSString stringWithFormat:@"%+.2f",
                                      self.currentLocation.coordinate.latitude];
@@ -166,7 +166,7 @@
                               cancelButtonTitle:@"Ok"
                               otherButtonTitles:nil, nil];
         [alert show];
-        [zipField becomeFirstResponder];
+        [self.zipField becomeFirstResponder];
         return;
     }
     
@@ -180,19 +180,20 @@
                               cancelButtonTitle:@"Ok"
                               otherButtonTitles:nil, nil];
         [alert show];
-        [zipField becomeFirstResponder];
+        [self.zipField becomeFirstResponder];
         return;
     }
     
     //need to check defaults for last time updated and which zip was used
+    //need to update to include whichever method was used last. cache entire object?
     NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
-    NSString *lastZipString = [prefs stringForKey:@"enteredZip"]; //get last zip code
-    NSDate *then = (NSDate *)[prefs objectForKey:@"lastUpdate"]; //get last time
+    NSString *lastZipString = [prefs stringForKey:@"enteredZip"]; 
+    NSDate *lastUpdate = (NSDate *)[prefs objectForKey:@"lastUpdate"];
     
     //figure out how much time has elapsed
     NSTimeInterval elapsed;
-    if (then) {
-        elapsed = [then timeIntervalSinceNow];
+    if (lastUpdate) {
+        elapsed = [lastUpdate timeIntervalSinceNow];
     } else {
         elapsed = 0;
     }
@@ -213,7 +214,8 @@
     [prefs synchronize];
 }
 
-- (void)scrollViewDidScroll:(UIScrollView *)sender {
+- (void)scrollViewDidScroll:(UIScrollView *)sender
+{
 	if (!pageControlBeingUsed) {
 		// Switch the indicator when more than 50% of the previous/next page is visible
 		CGFloat pageWidth = self.scrollView.frame.size.width;
@@ -222,7 +224,8 @@
 	}
 }
 
-- (IBAction)changePage {
+- (IBAction)changePage
+{
 	// Update the scroll view to the appropriate page
 	CGRect frame;
 	frame.origin.x = self.scrollView.frame.size.width * self.pageControl.currentPage;
@@ -237,15 +240,18 @@
 	pageControlBeingUsed = YES;
 }
 
-- (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView {
+- (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView
+{
     pageControlBeingUsed = NO;
 }
 
-- (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView {
+- (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView
+{
     pageControlBeingUsed = NO;
 }
 
-- (BOOL)needToUpdate {
+- (BOOL)needToUpdate
+{
   //needs to be written
     return 1;
 }
@@ -256,12 +262,12 @@
         didUpdateToLocation:(CLLocation *)newLocation
         fromLocation:(CLLocation *)oldLocation
 {
-    //NSLog(@"current latitude: %@\ncurrent longitude: %@", currentLatitude, currentLongitude);
-    
-    //other information available, like accuracy, altitude, etc.
-    
+        
     //if(currentLocation == nil)
-        currentLocation = newLocation;
+        self.currentLocation = newLocation;
+    
+    //NSLog(@"current latitude: %@", self.currentLocation);
+
 
 }
 
@@ -276,7 +282,8 @@
     return;
 }
 
-- (void)viewDidUnload {
+- (void)viewDidUnload
+{
     [self setZipField:nil];
     [self setCurrentLabel:nil];
     [self setNextDayLabel:nil];
@@ -290,11 +297,14 @@
 }
 
 //deprecated in iOS6
-- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
+- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
+{
     return (interfaceOrientation != UIInterfaceOrientationPortraitUpsideDown);
 }
+
 //for iOS6
-- (NSUInteger)supportedInterfaceOrientations {
+- (NSUInteger)supportedInterfaceOrientations
+{
     return UIInterfaceOrientationMaskPortrait;
 }
 
@@ -305,11 +315,14 @@
     [zipField resignFirstResponder];
 }
 
--(IBAction)backgroundTouched:(id)sender {
+//non-functional with a scrollview active   
+-(IBAction)backgroundTouched:(id)sender
+{
     [zipField resignFirstResponder];
 }
 
--(IBAction)textFieldReturn:(id)sender {
+-(IBAction)textFieldReturn:(id)sender
+{
     [sender resignFirstResponder];
 }
 

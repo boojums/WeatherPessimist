@@ -39,13 +39,6 @@
 - (void)setClimateZoneByZip:(NSNumber *)zipCode;
 
 - (void)pessimizeData;
-- (void)none;
-- (void)desert;
-- (void)southeast;
-- (void)northeast;
-- (void)midwest;
-- (void)mountainWest;
-- (void)pacificNW;
-- (void)midatlantic;
+
 @end
 
