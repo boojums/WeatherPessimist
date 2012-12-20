@@ -1,40 +1,41 @@
 //
-//  WeatherData.h
-//  WeatherPessimist
-//
-//  Created by Cristina Luis on 8/17/12.
-//  Copyright (c) 2012 Cristina Luis. All rights reserved.
+//  WXPData.h
+//  WeatherPessimist data object
 //
 
-@interface WeatherData : NSObject
+
+@interface WXPData : NSObject
 {
     int             climateZone;
     NSArray         *climateZoneNames;
-    NSDictionary    *data;
+    NSDictionary    *allData;
     NSDictionary    *currentConditions;
-    NSDictionary    *nextDayForecast;
-    NSDictionary    *twoDayForecast;
+    NSMutableArray  *forecastConditions;
     NSDictionary    *nearest_area;
-    NSString        *code;
+    NSMutableArray  *weatherCodes;
     NSDictionary    *codeDictionary;
-    NSArray         *zoneDescriptions;
+    NSMutableArray         *zoneDescriptions;
 }
 
 
 //pressimistic climate variables here - as properties
 //single variable for current conditions, array for forecasted conditions (0 tomorrow, 1 next, etc)
+//better as dictionaries?
 @property int           tempF; // should probably all be NSNumbers for consistency with later
 @property int           wind_mph;
-@property (strong, nonatomic) NSMutableArray *forecastMaxTempsF;
-@property (strong, nonatomic) NSMutableArray *forecastMinTempsF;
-@property (strong, nonatomic) NSMutableArray *forecastWindsM;
-@property (strong, nonatomic) NSString *description;
+@property int           humidity;
+//@property int           precipMM;
+@property (strong, nonatomic) NSMutableArray *maxTempsF;
+@property (strong, nonatomic) NSMutableArray *minTempsF;
+@property (strong, nonatomic) NSMutableArray *windsM;
+@property (strong, nonatomic) NSMutableArray *precipMM;
+@property (strong, nonatomic) NSMutableArray *descriptions;
 @property (strong, nonatomic) NSDateComponents   *dateComponents;
 @property (strong, nonatomic) NSString *imageName;
 
 -(id)initWithData:(NSDictionary *)jsondata;
+-(id)initWithQuery:(NSString *)query;
 
-//if these are not in the interface but only implemented, then are they private?
 - (void)setClimateZoneByLatLong;
 - (void)setClimateZoneByZip:(NSNumber *)zipCode;
 

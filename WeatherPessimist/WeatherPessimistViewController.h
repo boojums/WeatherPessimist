@@ -12,6 +12,7 @@
 @interface WeatherPessimistViewController : UIViewController <UIScrollViewDelegate, CLLocationManagerDelegate>
 {
     BOOL pageControlBeingUsed;
+    WXPData *weatherData;
 }
 
 @property (strong, nonatomic) IBOutlet UITextField *zipField;
