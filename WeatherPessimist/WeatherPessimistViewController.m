@@ -2,49 +2,14 @@
 //  WeatherPessimistViewController.m
 //  WeatherPessimist
 
-
 /* To do list:
  - add search for location support from http://www.worldweatheronline.com/feed/search.ashx
- 
 */
 
 #define kBgQueue dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0) //macro for background queue
-#define kJSONStringURL @"/Users/csluis/Code/iOS/WeatherPessimist/weatherdata.json"
-//#define kJSONStringURL @"http://free.worldweatheronline.com/feed/weather.ashx?q=85711&format=json&num_of_days=2&key=be45236e98154106120808&includeLocation=yes"
-
-#define kJSONStringURLBeginning @"http://free.worldweatheronline.com/feed/weather.ashx?q="
-#define kJSONStringURLEnd @"&format=json&num_of_days=2&key=be45236e98154106120808&includeLocation=yes"
-
 
 #import "WXPData.h"
 #import "WeatherPessimistViewController.h"
-
-#pragma mark -
-#pragma mark NSDictionary categories for JSON support
-@interface NSDictionary(JSONCategories)
-
-+(NSDictionary*)dictionaryWithContentsOfJSONURLString:(NSString*)urlAddress;
-
-@end
-
-@implementation NSDictionary(JSONCategories)
-
-+(NSDictionary*)dictionaryWithContentsOfJSONURLString:(NSString*)urlAddress
-{
-    NSData* data = [NSData dataWithContentsOfURL:
-                    [NSURL URLWithString:urlAddress]];
-    if(data == nil) {
-        NSLog(@"failed to load data with url");
-        return nil;
-    }
-    __autoreleasing NSError* error = nil;
-    id result = [NSJSONSerialization JSONObjectWithData:data
-                                                options:kNilOptions error:&error];
-    if (error != nil) return nil;
-    return result;
-}
-
-@end
 
 #pragma mark - 
 #pragma WeatherPessimistViewController implementation
@@ -53,19 +18,19 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    
-    //first check to see when last update was - info is cached
-    //check if connected to internet
-    //if needed, use cached information first
-    //if time to refresh, use location finder or default zip code
-
+        
+    self.currentLocation = nil;
     self.locationManager = [[CLLocationManager alloc] init];
     self.locationManager.desiredAccuracy = kCLLocationAccuracyThreeKilometers;
     self.locationManager.delegate = self;
     [self.locationManager startUpdatingLocation];
-    self.currentLocation = nil;
     
-    //archivd data should be loaded from last use. Don't fetch until asked?
+    if (![WXPData canConnect])
+        NSLog(@"Can't connect");
+    else
+        NSLog(@"Can connect");
+    
+    //archived data should be loaded from last use. Don't fetch until asked?
 
     pageControlBeingUsed = NO;
     
@@ -82,104 +47,96 @@
     self.pageControl.currentPage = 0;
     self.pageControl.numberOfPages = 2;
     
-    //set single tap recognizer
-    UITapGestureRecognizer *singleTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(singleTapGestureCaptured:)];
-    [self.scrollView addGestureRecognizer:singleTap];
-    
+    //somehow wait for current location and update automatically -- perhaps in didUpdateToLocation
+    if(self.currentLocation != nil)
+        [self currentLocationSearch];
+
 }
 
-//called once data has been retrieved from web - should be bg thread if large file to be parsed
-- (void)fetchedData:(NSDictionary *)responseData {
-    
-    NSDictionary *data = [responseData objectForKey:@"data"];
-    if ((data == NULL) || ([data objectForKey:@"error"])){
-        UIAlertView *alert = [[UIAlertView alloc]
-                              initWithTitle: @"No weather!"
-                              message:@"We're having trouble getting your forecast!"
-                              delegate:nil
-                              cancelButtonTitle:@"Bummer"
-                              otherButtonTitles:nil, nil];
-        [alert show];
-        self.zipField.text = @"";
+//could be one method using id of button to determine whether to build current location query or search
+//but they are different -- no search results needed for current lcoation 
+- (IBAction)currentLocationSearch
+{
+    NSLog(@"currentLocationSearch");
+    if(![WXPData canConnect]) {
         return;
     }
-       
-    weatherData = [[WXPData alloc] initWithData:data];
-    if(weatherData) {
-        [weatherData pessimizeData];
+    //need to check when last check was, used cached data if available
+    
+    NSString *query;
+    if(self.currentLocation != nil){
+        NSString *latitude = [NSString stringWithFormat:@"%+.2f",
+                                self.currentLocation.coordinate.latitude];
+        NSString *longitude = [NSString stringWithFormat:@"%+.2f",
+                                self.currentLocation.coordinate.longitude];
+        query = [NSString stringWithFormat:@"%@,%@",latitude, longitude];
+    } else {
+        NSLog(@"No location");
     }
-    [self updateLabels];
+    
+    if([self timeToUpdate:query])
+    {
+        weatherData = [[WXPData alloc] initWithQuery:query];
+        [weatherData pessimizeData];
+        [self updateLabels];
+        
+        //need to update to include whichever method was used last. cache entire object?
+        NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
+        [prefs setObject:[NSDate date] forKey:@"lastUpdate"];
+        [prefs setObject:query forKey:@"lastquery"];
+        [prefs synchronize];
+    }
+    return;
 }
+
+- (IBAction)querySearch
+{
+    //should include a search for valid search possibilities
+    NSLog(@"querySearch");
+    NSString *query = self.searchField.text;
+    [self.searchField resignFirstResponder];
+        
+    if([self timeToUpdate:query])
+    {
+        weatherData = [[WXPData alloc] initWithQuery:query];
+        //check for errors
+        [weatherData pessimizeData];
+        [self updateLabels];
+
+        //need to update to include whichever method was used last. cache entire object?
+        NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
+        [prefs setObject:[NSDate date] forKey:@"lastUpdate"];
+        [prefs setObject:query forKey:@"lastquery"];
+        [prefs synchronize];
+    }
+    return;
+ }
+
 
 - (void)updateLabels
 {
     //update labels with weatherData pessimized data -- array for forecasted data?
     self.currentLabel.numberOfLines = 0;
-    self.currentLabel.text = [NSString stringWithFormat:@"%@\n%d°F\n%dmph", weatherData.description, weatherData.tempF, weatherData.wind_mph];
     
-    self.nextDayLabel.text = [NSString stringWithFormat:@"Tomorrow will be %@°F", weatherData.maxTempsF[0]];
+    NSString *description = [weatherData.pessimizedCurrentConditions objectForKey:@"description"];
+    NSString *temp = [weatherData.pessimizedCurrentConditions objectForKey:@"temp_F"];
+    NSString *wind = [weatherData.pessimizedCurrentConditions objectForKey:@"windspeedMiles"];
+    self.currentLabel.text = [NSString stringWithFormat:@"%@\n%@°F\n%@mph", description, temp, wind];
     
-    self.twoDayLabel.text = [NSString stringWithFormat:@"The next day will be %@°F", weatherData.maxTempsF[1]];
+    temp = [weatherData.pessimizedForecastConditions[0] objectForKey:@"tempMaxF"];
+    self.nextDayLabel.text = [NSString stringWithFormat:@"Tomorrow will be %@°F", temp];
+    temp = [weatherData.pessimizedForecastConditions[1] objectForKey:@"tempMaxF"];
+    self.twoDayLabel.text = [NSString stringWithFormat:@"The next day will be %@°F", temp];
     
-    self.currentImage.image = [UIImage imageNamed:weatherData.imageName];
+    self.currentImage.image = [UIImage imageNamed:weatherData.imageNames[0]];
     
     //needs date formatting with NSDateFormatter
     self.updatedLabel.text = [NSString stringWithFormat:@"Last Updated: %@", [NSDate date]];
 }
 
-//rename to something descriptive about what it does
-- (IBAction)buttonPushed
+- (BOOL)timeToUpdate:(NSString *)query
 {
-    //should include a search for valid search possibilities
-    NSLog(@"buttonPushed");
-    NSString *query;
-    [self.zipField resignFirstResponder];
-    
-    //needs negatives, too?
-    if(self.zipField.text.length == 0) {
-        NSString *latitude = [NSString stringWithFormat:@"%+.2f",
-                                     self.currentLocation.coordinate.latitude];
-        NSString *longitude = [NSString stringWithFormat:@"%+.2f",
-                                      self.currentLocation.coordinate.longitude];
-        query = [NSString stringWithFormat:@"%@,%@",latitude, longitude];
-    } else {
-        //zip code checker method
-        NSString *toScan = self.zipField.text;  
-        NSScanner *s = [NSScanner scannerWithString:toScan];
-        NSString *zipString;
-        BOOL foo = [s scanCharactersFromSet:[NSCharacterSet decimalDigitCharacterSet] intoString:&zipString];
-        
-        if((!foo) || ([zipString length] != 5)) {
-            UIAlertView *alert = [[UIAlertView alloc]
-                                  initWithTitle:@"Invalid zip code"
-                                  message:@"Try a real zip code."
-                                  delegate:nil
-                                  cancelButtonTitle:@"Ok"
-                                  otherButtonTitles:nil, nil];
-            [alert show];
-            [self.zipField becomeFirstResponder];
-            return;
-        }
-        
-        NSNumber *zipNum = [NSNumber numberWithInt:[zipString intValue]];
-        if ([zipNum intValue] <= 0) {
-            UIAlertView *alert = [[UIAlertView alloc]
-                                  initWithTitle:@"Invalid zip code"
-                                  message:@"Try a real zip code."
-                                  delegate:nil
-                                  cancelButtonTitle:@"Ok"
-                                  otherButtonTitles:nil, nil];
-            [alert show];
-            [self.zipField becomeFirstResponder];
-            return;
-        }
-    query = zipString;
-        
-    }
-    
-
     //need to check defaults for last time updated and which query was used
-    //need to update to include whichever method was used last. cache entire object?
     NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
     NSString *lastQuery = [prefs stringForKey:@"lastQuery"];
     NSDate *lastUpdate = (NSDate *)[prefs objectForKey:@"lastUpdate"];
@@ -194,19 +151,14 @@
     
     //make sure 15 minutes (900 seconds) has elapsed and it's not the same new zip code
     if ((elapsed > -900) && ([lastQuery isEqualToString:query])) {
-        return; 
+        return NO;
     }
     
-    weatherData = [[WXPData alloc] initWithQuery:query];
-    [weatherData pessimizeData];
-    [self updateLabels];
-    
-    //store all of it?
-    [prefs setObject:[NSDate date] forKey:@"lastUpdate"];
-    [prefs setObject:query forKey:@"lastquery"];
-    [prefs synchronize];
+    return YES;
 }
 
+
+/******************************************** UI Stuff ****************************************/
 - (void)scrollViewDidScroll:(UIScrollView *)sender
 {
 	if (!pageControlBeingUsed) {
@@ -243,51 +195,6 @@
     pageControlBeingUsed = NO;
 }
 
-- (BOOL)needToUpdate
-{
-  //needs to be written
-    return 1;
-}
-
-#pragma mark -
-#pragma mark CLLocationManager delegate methods
--(void)locationManager:(CLLocationManager *)manager
-        didUpdateToLocation:(CLLocation *)newLocation
-        fromLocation:(CLLocation *)oldLocation
-{
-        
-    //if(currentLocation == nil)
-        self.currentLocation = newLocation;
-    
-    //NSLog(@"current latitude: %@", self.currentLocation);
-
-
-}
-
--(void)locationManager:(CLLocationManager *)manager
-      didFailWithError:(NSError *)error
-{
-    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"oops!"
-                                                    message:@"Can't get location information!" delegate:nil
-                                          cancelButtonTitle:@"Okay"
-                                          otherButtonTitles:nil, nil];
-    [alert show];
-    return;
-}
-
-- (void)viewDidUnload
-{
-    [self setZipField:nil];
-    [self setCurrentLabel:nil];
-    [self setNextDayLabel:nil];
-    [self setTwoDayLabel:nil];
-    self.scrollView = nil;
-    self.pageControl = nil;
-
-    [self setUpdatedLabel:nil];
-    [super viewDidUnload];
-    // Release any retained subviews of the main view.
-}
 
 //deprecated in iOS6
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
@@ -305,13 +212,13 @@
 - (void)singleTapGestureCaptured:(UITapGestureRecognizer *)gesture
 {
     //CGPoint touchPoint=[gesture locationInView:scrollView];
-    [self.zipField resignFirstResponder];
+    [self.searchField resignFirstResponder];
 }
 
 //non-functional with a scrollview active   
 -(IBAction)backgroundTouched:(id)sender
 {
-    [self.zipField resignFirstResponder];
+    [self.searchField resignFirstResponder];
 }
 
 -(IBAction)textFieldReturn:(id)sender
@@ -319,11 +226,112 @@
     [sender resignFirstResponder];
 }
 
+#pragma mark -
+#pragma mark CLLocationManager delegate methods
+-(void)locationManager:(CLLocationManager *)manager
+   didUpdateToLocation:(CLLocation *)newLocation
+          fromLocation:(CLLocation *)oldLocation
+{
+    //if(currentLocation == nil)
+    self.currentLocation = newLocation;
+    [self.locationManager stopUpdatingLocation];
+    //NSLog(@"current latitude: %@", self.currentLocation);
+    
+}
+
+-(void)locationManager:(CLLocationManager *)manager
+      didFailWithError:(NSError *)error
+{
+    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"oops!"
+                                                    message:@"Can't get location information!" delegate:nil
+                                          cancelButtonTitle:@"Okay"
+                                          otherButtonTitles:nil, nil];
+    [alert show];
+    return;
+}
+
+
+- (void)viewDidUnload
+{
+    [self setSearchField:nil];
+    [self setCurrentLabel:nil];
+    [self setNextDayLabel:nil];
+    [self setTwoDayLabel:nil];
+    self.scrollView = nil;
+    self.pageControl = nil;
+    
+    [self setUpdatedLabel:nil];
+    [super viewDidUnload];
+    // Release any retained subviews of the main view.
+}
 @end
+
+
+
 
 /*    //create background queue, fetch data in the background based on last zip code
  dispatch_async(kBgQueue, ^{
  NSDictionary *json = [NSDictionary dictionaryWithContentsOfJSONURLString:kJSONStringURL];        [self performSelectorOnMainThread:@selector(fetchedData:)                                                                                                                                  withObject:json waitUntilDone:YES]; //fetchedData must be on main thread b/c UI stuff
  });
  
+ //called once data has been retrieved from web - should be bg thread if large file to be parsed
+ - (void)fetchedData:(NSDictionary *)responseData {
+ NSLog(@"fetchedData \n");
+ 
+ NSDictionary *data = [responseData objectForKey:@"data"];
+ if ((data == NULL) || ([data objectForKey:@"error"])){
+ UIAlertView *alert = [[UIAlertView alloc]
+ initWithTitle: @"No weather!"
+ message:@"We're having trouble getting your forecast!"
+ delegate:nil
+ cancelButtonTitle:@"Bummer"
+ otherButtonTitles:nil, nil];
+ [alert show];
+ self.zipField.text = @"";
+ return;
+ }
+ 
+ weatherData = [[WXPData alloc] initWithData:data];
+ if(weatherData) {
+ [weatherData pessimizeData];
+ }
+ [self updateLabels];
+ }
+
+ 
+*/
+
+
+/*
+ //zip code checker method
+ NSString *toScan = self.searchField.text;
+ NSScanner *s = [NSScanner scannerWithString:toScan];
+ NSString *zipString;
+ BOOL foo = [s scanCharactersFromSet:[NSCharacterSet decimalDigitCharacterSet] intoString:&zipString];
+ 
+ if((!foo) || ([zipString length] != 5)) {
+ UIAlertView *alert = [[UIAlertView alloc]
+ initWithTitle:@"Invalid zip code"
+ message:@"Try a real zip code."
+ delegate:nil
+ cancelButtonTitle:@"Ok"
+ otherButtonTitles:nil, nil];
+ [alert show];
+ [self.searchField becomeFirstResponder];
+ return;
+ }
+ 
+ NSNumber *zipNum = [NSNumber numberWithInt:[zipString intValue]];
+ if ([zipNum intValue] <= 0) {
+ UIAlertView *alert = [[UIAlertView alloc]
+ initWithTitle:@"Invalid zip code"
+ message:@"Try a real zip code."
+ delegate:nil
+ cancelButtonTitle:@"Ok"
+ otherButtonTitles:nil, nil];
+ [alert show];
+ [self.searchField becomeFirstResponder];
+ return;
+ }
+ query = zipString;
 */

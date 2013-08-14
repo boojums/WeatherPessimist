@@ -8,19 +8,16 @@
 		<dict/>
 		<key>Am</key>
 		<dict/>
+		<key>BWh</key>
+		<string>kHotDesert</string>
 		<key>Aw</key>
 		<dict/>
-		<key>BWh</key>
-		<dict>
-			<key>New item</key>
-			<string></string>
-		</dict>
 		<key>BSh</key>
-		<dict/>
+		<string>kHotDesert</string>
 		<key>BWk</key>
-		<dict/>
+		<string>kHotDesert</string>
 		<key>BSk</key>
-		<dict/>
+		<string>kMountainWest</string>
 		<key>Csa</key>
 		<dict/>
 		<key>Csb</key>
@@ -34,9 +31,9 @@
 		<key>Cfc</key>
 		<dict/>
 		<key>Dfa</key>
-		<dict/>
+		<string>kFlyoverStates</string>
 		<key>Dfb</key>
-		<dict/>
+		<string>kRedSoxNation</string>
 		<key>Dwa</key>
 		<dict/>
 		<key>Dwb</key>

@@ -31,7 +31,6 @@
 		C2DBD40115DEDE650076104E /* WeatherPessimistAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = C2DBD40015DEDE650076104E /* WeatherPessimistAppDelegate.m */; };
 		C2DBD40415DEDE650076104E /* MainStoryboard.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C2DBD40215DEDE650076104E /* MainStoryboard.storyboard */; };
 		C2DBD40715DEDE650076104E /* WeatherPessimistViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = C2DBD40615DEDE650076104E /* WeatherPessimistViewController.m */; };
-		C2F4DA261683A67F00FE9BFF /* WXPWeatherVariables.m in Sources */ = {isa = PBXBuildFile; fileRef = C2F4DA251683A67F00FE9BFF /* WXPWeatherVariables.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -65,8 +64,6 @@
 		C2DBD40315DEDE650076104E /* en */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = en; path = en.lproj/MainStoryboard.storyboard; sourceTree = "<group>"; };
 		C2DBD40515DEDE650076104E /* WeatherPessimistViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WeatherPessimistViewController.h; sourceTree = "<group>"; };
 		C2DBD40615DEDE650076104E /* WeatherPessimistViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = WeatherPessimistViewController.m; sourceTree = "<group>"; };
-		C2F4DA241683A67F00FE9BFF /* WXPWeatherVariables.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WXPWeatherVariables.h; sourceTree = "<group>"; };
-		C2F4DA251683A67F00FE9BFF /* WXPWeatherVariables.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WXPWeatherVariables.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -141,8 +138,6 @@
 				C2DBD40615DEDE650076104E /* WeatherPessimistViewController.m */,
 				C2A9EB5A165E7DFB00B8CAFA /* WXPData.h */,
 				C2A9EB5B165E7E8F00B8CAFA /* WXPData.m */,
-				C2F4DA241683A67F00FE9BFF /* WXPWeatherVariables.h */,
-				C2F4DA251683A67F00FE9BFF /* WXPWeatherVariables.m */,
 				C28DF8FB166BF6E900A56DA2 /* wxcodes.plist */,
 				C29E16E0166A25C400C5B7BD /* climate_class.plist */,
 				C29E171D166A998700C5B7BD /* Images */,
@@ -189,7 +184,7 @@
 			isa = PBXProject;
 			attributes = {
 				CLASSPREFIX = WeatherPessimist;
-				LastUpgradeCheck = 0440;
+				LastUpgradeCheck = 0460;
 				ORGANIZATIONNAME = "Cristina Luis";
 			};
 			buildConfigurationList = C2DBD3E615DEDE650076104E /* Build configuration list for PBXProject "WeatherPessimist" */;
@@ -244,7 +239,6 @@
 				C2DBD40115DEDE650076104E /* WeatherPessimistAppDelegate.m in Sources */,
 				C2DBD40715DEDE650076104E /* WeatherPessimistViewController.m in Sources */,
 				C2A9EB5C165E7E8F00B8CAFA /* WXPData.m in Sources */,
-				C2F4DA261683A67F00FE9BFF /* WXPWeatherVariables.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -277,6 +271,9 @@
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
@@ -304,6 +301,9 @@
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = YES;

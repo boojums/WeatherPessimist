@@ -15,7 +15,7 @@
     WXPData *weatherData;
 }
 
-@property (strong, nonatomic) IBOutlet UITextField *zipField;
+@property (strong, nonatomic) IBOutlet UITextField *searchField;
 @property (strong, nonatomic) IBOutlet UILabel *currentLabel;
 @property (strong, nonatomic) IBOutlet UILabel *nextDayLabel;
 @property (strong, nonatomic) IBOutlet UILabel *twoDayLabel;
@@ -27,7 +27,8 @@
 @property (strong, nonatomic) CLLocationManager *locationManager;
 @property (strong, nonatomic) CLLocation *currentLocation;
 
-- (IBAction)buttonPushed;
+- (IBAction)currentLocationSearch;
+- (IBAction)querySearch;
 - (IBAction)textFieldReturn:(id)sender;
 - (IBAction)backgroundTouched:(id)sender;
 - (IBAction)changePage;
