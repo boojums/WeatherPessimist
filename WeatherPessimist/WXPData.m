@@ -604,13 +604,6 @@
 }
 
 @end
-/*
- NSEnumerator *enumerator = [twoDayForecast keyEnumerator];
- id key;
- while ((key = [enumerator nextObject])) {
- NSLog(@"key: %@", key);
- NSLog(@"%@", [twoDayForecast objectForKey:key]);
- }
- */
+
 
 
