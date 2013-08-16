@@ -6,7 +6,6 @@
  - add search for location support from http://www.worldweatheronline.com/feed/search.ashx
 */
 
-#define kBgQueue dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0) //macro for background queue
 
 #import "WXPData.h"
 #import "WeatherPessimistViewController.h"
@@ -25,10 +24,11 @@
     self.locationManager.delegate = self;
     [self.locationManager startUpdatingLocation];
     
-    if (![WXPData canConnect])
-        NSLog(@"Can't connect");
-    else
-        NSLog(@"Can connect");
+    if (![WXPData canConnect]) {
+        debug(@"Can't connect");
+    } else {
+        debug(@"Can connect");
+    }
     
     //archived data should be loaded from last use. Don't fetch until asked?
 
@@ -57,7 +57,7 @@
 //but they are different -- no search results needed for current lcoation 
 - (IBAction)currentLocationSearch
 {
-    NSLog(@"currentLocationSearch");
+    debug(@"currentLocationSearch");
     if(![WXPData canConnect]) {
         return;
     }
@@ -71,7 +71,7 @@
                                 self.currentLocation.coordinate.longitude];
         query = [NSString stringWithFormat:@"%@,%@",latitude, longitude];
     } else {
-        NSLog(@"No location");
+        debug(@"No location");
     }
     
     if([self timeToUpdate:query])
@@ -92,17 +92,17 @@
 - (IBAction)querySearch
 {
     //should include a search for valid search possibilities
-    NSLog(@"querySearch");
+    debug(@"querySearch");
     NSString *query = self.searchField.text;
     [self.searchField resignFirstResponder];
         
     if([self timeToUpdate:query])
     {
         weatherData = [[WXPData alloc] initWithQuery:query];
-        //check for errors
-        [weatherData pessimizeData];
-        [self updateLabels];
-
+        if (weatherData) {
+            [weatherData pessimizeData];
+            [self updateLabels];
+        }
         //need to update to include whichever method was used last. cache entire object?
         NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
         [prefs setObject:[NSDate date] forKey:@"lastUpdate"];
@@ -115,23 +115,32 @@
 
 - (void)updateLabels
 {
-    //update labels with weatherData pessimized data -- array for forecasted data?
     self.currentLabel.numberOfLines = 0;
     
-    NSString *description = [weatherData.pessimizedCurrentConditions objectForKey:@"description"];
-    NSString *temp = [weatherData.pessimizedCurrentConditions objectForKey:@"temp_F"];
-    NSString *wind = [weatherData.pessimizedCurrentConditions objectForKey:@"windspeedMiles"];
-    self.currentLabel.text = [NSString stringWithFormat:@"%@\n%@°F\n%@mph", description, temp, wind];
-    
-    temp = [weatherData.pessimizedForecastConditions[0] objectForKey:@"tempMaxF"];
-    self.nextDayLabel.text = [NSString stringWithFormat:@"Tomorrow will be %@°F", temp];
-    temp = [weatherData.pessimizedForecastConditions[1] objectForKey:@"tempMaxF"];
-    self.twoDayLabel.text = [NSString stringWithFormat:@"The next day will be %@°F", temp];
-    
     self.currentImage.image = [UIImage imageNamed:weatherData.imageNames[0]];
+    NSString *description = [weatherData descriptionForDay:0];
+    NSString *temp = weatherData.sadMaxTempF[0];
+    NSString *wind = weatherData.sadWindspeedMiles[0];
+    self.currentLabel.text = [NSString stringWithFormat:@"%@\n%@°F\n%@mph", description, temp, wind];
+
+    NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
+    [dateFormatter setTimeStyle:NSDateFormatterNoStyle];
+    [dateFormatter setDateStyle:NSDateFormatterMediumStyle];
+    [dateFormatter setDoesRelativeDateFormatting:YES];
+    self.dateLabel.text = [dateFormatter stringFromDate:[weatherData dateForDay:0]];
     
-    //needs date formatting with NSDateFormatter
-    self.updatedLabel.text = [NSString stringWithFormat:@"Last Updated: %@", [NSDate date]];
+    self.locationLabel.text = [weatherData locationString];
+    
+    self.nextDayLabel.text =
+            [NSString stringWithFormat:@"Tomorrow will be %@°F", weatherData.sadMaxTempF[1]];
+    self.twoDayLabel.text =
+        [NSString stringWithFormat:@"The next day will be %@°F", weatherData.sadMaxTempF[2]];
+    
+    //last updated
+    NSDate *today = [NSDate date];
+    [dateFormatter setDateFormat:@"EEE MMM d h:mm a"];
+    NSString *dateString = [dateFormatter stringFromDate:today];
+    self.updatedLabel.text = [NSString stringWithFormat:@"Last Updated: %@", dateString];
 }
 
 - (BOOL)timeToUpdate:(NSString *)query
@@ -196,19 +205,11 @@
 }
 
 
-//deprecated in iOS6
-- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
-{
-    return (interfaceOrientation != UIInterfaceOrientationPortraitUpsideDown);
-}
-
-//for iOS6
 - (NSUInteger)supportedInterfaceOrientations
 {
     return UIInterfaceOrientationMaskPortrait;
 }
 
-//this causes problems with iOS5.1!
 - (void)singleTapGestureCaptured:(UITapGestureRecognizer *)gesture
 {
     //CGPoint touchPoint=[gesture locationInView:scrollView];
@@ -235,7 +236,7 @@
     //if(currentLocation == nil)
     self.currentLocation = newLocation;
     [self.locationManager stopUpdatingLocation];
-    //NSLog(@"current latitude: %@", self.currentLocation);
+    //nslog(@"current latitude: %@", self.currentLocation);
     
 }
 
@@ -276,7 +277,7 @@
  
  //called once data has been retrieved from web - should be bg thread if large file to be parsed
  - (void)fetchedData:(NSDictionary *)responseData {
- NSLog(@"fetchedData \n");
+ nslog(@"fetchedData \n");
  
  NSDictionary *data = [responseData objectForKey:@"data"];
  if ((data == NULL) || ([data objectForKey:@"error"])){

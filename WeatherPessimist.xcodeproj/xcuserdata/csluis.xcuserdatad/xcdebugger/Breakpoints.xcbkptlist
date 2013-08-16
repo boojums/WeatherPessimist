@@ -83,13 +83,13 @@
          shouldBeEnabled = "No"
          ignoreCount = "0"
          continueAfterRunningActions = "No"
-         filePath = "WeatherPessimist/WXPData.m"
-         timestampString = "398192003.004"
+         filePath = "WeatherPessimist/WeatherPessimistViewController.m"
+         timestampString = "398341755.011557"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "114"
-         endingLineNumber = "114"
-         landmarkName = "-initWithQuery:"
+         startingLineNumber = "122"
+         endingLineNumber = "122"
+         landmarkName = "-updateLabels"
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
@@ -97,25 +97,12 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "WeatherPessimist/WXPData.m"
-         timestampString = "398192003.004"
+         timestampString = "398342496.140756"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "338"
-         endingLineNumber = "338"
-         landmarkName = "-defaultZone"
-         landmarkType = "5">
-      </FileBreakpoint>
-      <FileBreakpoint
-         shouldBeEnabled = "No"
-         ignoreCount = "0"
-         continueAfterRunningActions = "No"
-         filePath = "WeatherPessimist/WXPData.m"
-         timestampString = "398192975.463353"
-         startingColumnNumber = "9223372036854775807"
-         endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "491"
-         endingLineNumber = "491"
-         landmarkName = "-descriptionsForWeatherCode:"
+         startingLineNumber = "60"
+         endingLineNumber = "60"
+         landmarkName = "+dictionaryWithContentsOfJSONURLString:"
          landmarkType = "5">
       </FileBreakpoint>
    </FileBreakpoints>

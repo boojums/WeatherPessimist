@@ -19,6 +19,8 @@
 @property (strong, nonatomic) IBOutlet UILabel *currentLabel;
 @property (strong, nonatomic) IBOutlet UILabel *nextDayLabel;
 @property (strong, nonatomic) IBOutlet UILabel *twoDayLabel;
+@property (strong, nonatomic) IBOutlet UILabel *locationLabel;
+@property (strong, nonatomic) IBOutlet UILabel *dateLabel;
 @property (strong, nonatomic) IBOutlet UIImageView *currentImage;
 @property (strong, nonatomic) IBOutlet UIScrollView* scrollView;
 @property (strong, nonatomic) IBOutlet UIPageControl* pageControl;

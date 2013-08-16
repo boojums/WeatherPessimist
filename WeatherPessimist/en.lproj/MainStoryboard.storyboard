@@ -34,7 +34,7 @@
                                         </connections>
                                     </button>
                                     <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" text="Label" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumFontSize="10" id="zGK-n8-nl3" userLabel="currentLabel">
-                                        <rect key="frame" x="20" y="305" width="280" height="97"/>
+                                        <rect key="frame" x="20" y="320" width="280" height="82"/>
                                         <color key="backgroundColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                         <color key="textColor" red="0.1732440184" green="0.75" blue="0.69686596919999999" alpha="1" colorSpace="calibratedRGB"/>
@@ -75,31 +75,20 @@
                                         </connections>
                                     </textField>
                                     <imageView userInteractionEnabled="NO" contentMode="scaleToFill" id="aop-uO-8EA">
-                                        <rect key="frame" x="70" y="142" width="180" height="180"/>
+                                        <rect key="frame" x="70" y="132" width="180" height="180"/>
                                     </imageView>
-                                    <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="center" text="Right Now" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="Cuu-zo-2SL">
-                                        <rect key="frame" x="20" y="113" width="280" height="21"/>
+                                    <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="center" text="Date" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="Cuu-zo-2SL">
+                                        <rect key="frame" x="20" y="98" width="280" height="21"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                         <color key="textColor" red="0.1732440184" green="0.75" blue="0.69686596919999999" alpha="1" colorSpace="calibratedRGB"/>
                                         <nil key="highlightedColor"/>
                                     </label>
-                                    <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" text="Last updated: never" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="Xri-6D-eKS">
-                                        <rect key="frame" x="111" y="403" width="98" height="21"/>
-                                        <fontDescription key="fontDescription" type="system" pointSize="11"/>
+                                    <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" text="Last updated: never" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="Xri-6D-eKS">
+                                        <rect key="frame" x="82" y="403" width="158" height="21"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="10"/>
                                         <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="calibratedRGB"/>
                                         <nil key="highlightedColor"/>
                                     </label>
-                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="infoLight" showsTouchWhenHighlighted="YES" lineBreakMode="middleTruncation" id="Yso-S0-SfU" userLabel="Info Button">
-                                        <rect key="frame" x="282" y="388" width="18" height="19"/>
-                                        <fontDescription key="fontDescription" type="boldSystem" pointSize="15"/>
-                                        <state key="normal">
-                                            <color key="titleColor" red="0.19607843459999999" green="0.30980393290000002" blue="0.52156865600000002" alpha="1" colorSpace="calibratedRGB"/>
-                                            <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
-                                        </state>
-                                        <state key="highlighted">
-                                            <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                                        </state>
-                                    </button>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" id="MKd-gB-Dyc">
                                         <rect key="frame" x="225" y="21" width="65" height="29"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
@@ -115,6 +104,13 @@
                                             <action selector="currentLocationSearch" destination="2" eventType="touchUpInside" id="KI2-0B-TCs"/>
                                         </connections>
                                     </button>
+                                    <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" text="Location" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="FCo-fg-5EQ">
+                                        <rect key="frame" x="32" y="69" width="257" height="21"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                        <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="calibratedRGB"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
                                 </subviews>
                                 <color key="backgroundColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
                                 <connections>
@@ -137,6 +133,8 @@
                     <connections>
                         <outlet property="currentImage" destination="aop-uO-8EA" id="EVK-4a-L9p"/>
                         <outlet property="currentLabel" destination="zGK-n8-nl3" id="z3Q-bS-h5Z"/>
+                        <outlet property="dateLabel" destination="Cuu-zo-2SL" id="QOH-73-EKU"/>
+                        <outlet property="locationLabel" destination="FCo-fg-5EQ" id="xhr-Xf-ohg"/>
                         <outlet property="nextDayLabel" destination="RCa-Ta-XyQ" id="w0K-bg-IST"/>
                         <outlet property="pageControl" destination="S5Q-HM-6EF" id="5Q8-0i-4tj"/>
                         <outlet property="scrollView" destination="kW9-vd-vl6" id="L5u-bD-6yN"/>
@@ -161,12 +159,14 @@
                 <relationship kind="action" name="textFieldReturn:"/>
                 <relationship kind="outlet" name="currentImage" candidateClass="UIImageView"/>
                 <relationship kind="outlet" name="currentLabel" candidateClass="UILabel"/>
+                <relationship kind="outlet" name="dateLabel" candidateClass="UILabel"/>
+                <relationship kind="outlet" name="locationLabel" candidateClass="UILabel"/>
                 <relationship kind="outlet" name="nextDayLabel" candidateClass="UILabel"/>
                 <relationship kind="outlet" name="pageControl" candidateClass="UIPageControl"/>
                 <relationship kind="outlet" name="scrollView" candidateClass="UIScrollView"/>
+                <relationship kind="outlet" name="searchField" candidateClass="UITextField"/>
                 <relationship kind="outlet" name="twoDayLabel" candidateClass="UILabel"/>
                 <relationship kind="outlet" name="updatedLabel" candidateClass="UILabel"/>
-                <relationship kind="outlet" name="zipField" candidateClass="UITextField"/>
             </relationships>
         </class>
     </classes>

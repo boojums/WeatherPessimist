@@ -3,17 +3,18 @@
 //  WeatherPessimist
 //
 //  Pessimizes current conditions and forecast based on climate area
-//  To use: initialize with a json object from WorldWeatherOnline
+//  To use: initialize with a query string
 //
 
 /*
  To do list:
+- use C arrays for variables with getter functions, eg (int)maxTempF forDay:(int)day
 - change climate zones to be more general
 - add climate zones mappings to climate_class.plist
-- set variables to be mutable arrays? temp, humidity, wind, etc?
 - enum for zone constants?
 - different leves of pessimism? slightly pessimistic just edges everything,
  */
+
 
 
 #define kNoClimateZone 0;
@@ -33,7 +34,7 @@
 //#define kJSONStringURL @"http://free.worldweatheronline.com/feed/weather.ashx?q=85711&format=json&num_of_days=2&key=be45236e98154106120808&includeLocation=yes"
 
 #define kJSONStringURLBeginning @"http://api.worldweatheronline.com/free/v1/weather.ashx?q="
-#define kJSONStringURLEnd @"&format=json&num_of_days=2&key=79shmj4zveymbv2mvzxhx6de&includeLocation=yes"
+#define kJSONStringURLEnd @"&format=json&num_of_days=5&key=79shmj4zveymbv2mvzxhx6de&includeLocation=yes"
 
 #import "WXPData.h"
 #import "WeatherPessimistViewController.h"
@@ -64,13 +65,13 @@
                                              options:kNilOptions
                                                error:&error];
         if (error) {
-        NSLog(@"%@", [error localizedDescription]);
+        debug(@"%@", [error localizedDescription]);
         }
     }
     
     //redunant
     if(JSONdata == nil) {
-        NSLog(@"Failed to load data with url");
+        debug(@"Failed to load data with url");
         return nil;
     }
     error = nil;
@@ -89,7 +90,17 @@
 #pragma WXPData private interface
 @interface WXPData()
 {
-    //instance variables here
+    int             forecastDays;
+    int             descriptionIndices[5];
+    int             climateZone;
+    NSString        *koppenClass;
+    NSArray         *climateZoneNames;
+    NSDictionary    *climateZoneCodeDictionary;
+
+    NSDictionary    *allData;
+    NSDictionary    *currentConditions;
+    NSMutableArray  *forecastConditions;
+    NSDictionary    *nearest_area;
 }
 
 @end
@@ -101,10 +112,23 @@
 -(id)initWithQuery:(NSString *)query
 {
     self = [super init];
+    
+    _maxTempF = [[NSMutableArray alloc] init];
+    _minTempF = [[NSMutableArray alloc] init];
+    _precipMM = [[NSMutableArray alloc] init];
+    _windspeedMiles = [[NSMutableArray alloc] init];
+    _windDir = [[NSMutableArray alloc] init];
+    _sadMaxTempF = [[NSMutableArray alloc] init];
+    _sadMinTempF = [[NSMutableArray alloc] init];
+    _sadPrecipMM = [[NSMutableArray alloc] init];
+    _sadWindspeedMiles = [[NSMutableArray alloc] init];
+    _descriptionsArrays = [[NSMutableArray alloc] init];
+    
     if(self){
         NSString *queryURL = [NSString stringWithFormat:@"%@%@%@",kJSONStringURLBeginning, query, kJSONStringURLEnd];
         //should be added to queue for async handling?
-        //NSLog(@"QueryURL: %@", queryURL);
+        debug(@"QueryURL: %@", queryURL);
+        queryURL = [queryURL stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
         NSDictionary *responseData = [NSDictionary dictionaryWithContentsOfJSONURLString:queryURL];
         
         if (responseData == nil) {
@@ -112,7 +136,12 @@
         }
         
         allData = [responseData objectForKey:@"data"];
-
+        
+        NSString *errorMsg = [[[allData objectForKey:@"error"] objectAtIndex:0] objectForKey:@"msg"];
+        if (errorMsg) {
+            debug(@"Error message from WWO:%@", errorMsg);
+            return nil;
+        }
         [self populateData];
     }
     
@@ -185,9 +214,12 @@
     NSDictionary *climate_classification = [NSDictionary dictionaryWithContentsOfFile:plistPath];
     
     if ([[NSNull null] isEqual:nearest_area]) {
-        NSLog(@"nearest area null");
+        debug(@"nearest area null");
         return;
     }
+    
+    //check for area code query and use that?
+    
     NSString *latitude = [nearest_area objectForKey:@"latitude"];
     NSString *longitude = [nearest_area objectForKey:@"longitude"];
         
@@ -197,11 +229,11 @@
     latitude = [NSString stringWithFormat:@"%.2f", [self roundToQuarter:latitude_dbl]];
     longitude = [NSString stringWithFormat:@"%.2f", [self roundToQuarter:longitude_dbl]];
     
-    NSLog(@"rounded latitude and longitude strings are is %@, %@", latitude, longitude);
+    debug(@"rounded latitude and longitude strings are is %@, %@", latitude, longitude);
     
-    NSString *koppenClass = [[climate_classification objectForKey:latitude] objectForKey:longitude];
+    koppenClass = [[climate_classification objectForKey:latitude] objectForKey:longitude];
     NSString *climate = [[climate_classification objectForKey:@"codes"] objectForKey:koppenClass];
-    NSLog(@"climate classification is: %@", climate);
+    debug(@"climate classification is: %@", climate);
     
     //get climate mapping from  climate_class plist, codes dictionary
     if (climate) {
@@ -234,8 +266,9 @@
    
     [self pessimizeDescriptions];
     [self setImageNames];
-
+    
     //call the special pessimizer function based on the climate zone
+    //OR -- better to have one method that does things based on koppen class?
     SEL s = NSSelectorFromString(self->climateZoneNames[climateZone]);
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Warc-performSelector-leaks"
@@ -247,27 +280,17 @@
 
 - (void)pessimizeDescriptions
 {
-    NSArray *currentDescriptions = [self descriptionsForWeatherCode:
-                           [currentConditions objectForKey:@"weatherCode"]];
-    
-    //consider using filtered predicate loading of array- summmer/winter/etc
-    int count = [currentDescriptions count];
-    if (count > 1) {
-        int num = (arc4random() % (count -1)) + 1; //any except the 0 index
-        [_pessimizedCurrentConditions setObject:currentDescriptions[num] forKey:@"description"];
-    }
-    
-    for (NSDictionary *day in forecastConditions) {
-        currentDescriptions = [self descriptionsForWeatherCode:
-                                [day objectForKey:@"weatherCode"]];
-        count = [currentDescriptions count];
-        int i = 0;
+    int count;
+    int i = 0;
+    for (NSArray *day in _descriptionsArrays)
+    {
+        count = [day count];
         if (count > 1) {
-            int num = (arc4random() % (count -1)) + 1; //any except the 0 index
-            [_pessimizedForecastConditions[i] setObject:currentDescriptions[num] forKey:@"description"];
-            i++;
+            descriptionIndices[i] = (arc4random() % (count -1)) + 1; //any except the 0 index
+        } else {
+            descriptionIndices[i] = 0;
         }
-
+        i++;
     }
     return;
 }
@@ -293,7 +316,40 @@
 
 - (void)defaultZone
 {
-    //this needs to be simplified. one method that takes a value and returns, run for all days
+    int maxTemp = 0;
+    int precip = 0;
+    int windspeed = 0;
+    for (int i=0; i < 5; i++) {
+        maxTemp = [_maxTempF[i] intValue];
+        precip = [_precipMM[i] intValue];
+        windspeed = [_windspeedMiles[i] intValue];
+        if ([self isSummer]) {
+            if (maxTemp > 80) {
+                maxTemp += 7;
+            } else if (maxTemp < 70) {
+                maxTemp -= 6;
+            }
+            
+        }
+        if ([self isWinter]) {
+            if ((maxTemp > 32) && (maxTemp < 43)) {
+                maxTemp = maxTemp + ((maxTemp - 32) / 2);
+            } else {
+                maxTemp -= 8;
+            }
+            windspeed += 5;
+            //calculate windchill?
+        }
+        precip += 5;
+
+        //NSLog(@"temp: %d", maxTemp);
+        _sadMaxTempF[i] = [NSNumber numberWithInt:maxTemp];
+        _sadPrecipMM[i] = [NSNumber numberWithInt:precip];
+        _sadWindspeedMiles[i] = [NSNumber numberWithInt:windspeed];
+    }
+    
+    //old current conditions code
+    /*
     int tempF = [[currentConditions objectForKey:@"temp_F"] intValue];
     if ([self isSummer]) {
         if (tempF > 80) {
@@ -311,38 +367,10 @@
             tempF -= 8;
         }
     }
-    
+
     NSString *tempFString = [NSString stringWithFormat:@"%d",tempF];
     [_pessimizedCurrentConditions setObject:tempFString forKey:@"temp_F"];;
-    
-    int i = 0;
-    for (NSDictionary *day in forecastConditions) {
-        tempF = [[day objectForKey:@"tempMaxF"] intValue];
-        if ([self isSummer]) {
-            if (tempF > 80) {
-                tempF += 7;
-            } else if (tempF < 70) {
-                tempF -= 6;
-            }
-            //make it rainier
-        }
-        
-        if ([self isWinter]) {
-            if ((tempF > 32) && (tempF < 43)) {
-                tempF = tempF + ((tempF - 32) / 2);
-            } else {
-                tempF -= 8;
-            }
-        }
-        
-        NSString *tempFString = [NSString stringWithFormat:@"%d",tempF];
-        NSLog(@"tempFString: %@",tempFString);
-        [_pessimizedForecastConditions[i] setObject:tempFString forKey:@"tempMaxF"];
-        //NSLog(@"pessimizedForecastConditions: %@",_pessimizedForecastConditions);
-
-         i++;
-    }
-    
+*/    
     return;
 }
 
@@ -433,21 +461,20 @@
 // ******************************************************************************** populateData
 - (void)populateData
 {
-    forecastDays = 2; //default for now
+    forecastDays = 5; //default for now
     climateZoneNames = [NSArray arrayWithObjects:@"defaultZone", @"desert", @"southeast", @"northeast", @"midwest", @"mountainWest", @"pacificNW", @"midatlantic", nil];
 
     currentConditions = [[allData objectForKey:@"current_condition"] objectAtIndex:0];
     forecastConditions = [allData objectForKey:@"weather"];
     nearest_area = [[allData objectForKey:@"nearest_area"] objectAtIndex:0];
     
-    _pessimizedCurrentConditions = [[NSMutableDictionary alloc] initWithDictionary:currentConditions];
-    _pessimizedForecastConditions = [[NSMutableArray alloc] initWithCapacity:forecastDays];
-
-    NSMutableDictionary *tempDictionary;
     for (NSDictionary *day in forecastConditions)
-        {
-            tempDictionary = [[NSMutableDictionary alloc] initWithDictionary:day];
-            [_pessimizedForecastConditions addObject:tempDictionary];
+        {            
+            [_maxTempF addObject:day[@"tempMaxF"]];
+            [_minTempF addObject:day[@"tempMinF"]];
+            [_precipMM addObject:day[@"precipMM"]];
+            [_windspeedMiles addObject:day[@"windspeedMiles"]];
+            [_windDir addObject:day[@"winddirection"]];
         }
     
     //get today's date -- should probably use date from weather request instead? need local date
@@ -465,22 +492,16 @@
         [self setClimateZoneByLatLong];
     }
     
-    NSLog(@"climateZone set to %i, %@", climateZone, climateZoneNames[climateZone]);
+    //NSLog(@"climateZone set to %i, %@", climateZone, climateZoneNames[climateZone]);
     
-    NSString *plistPath = [[NSBundle mainBundle] pathForResource:@"wxcodes" ofType:@"plist"];
     //should check if plistPath is valid
-    
+    NSString *plistPath = [[NSBundle mainBundle] pathForResource:@"wxcodes" ofType:@"plist"];
     climateZoneCodeDictionary = [NSDictionary dictionaryWithContentsOfFile:plistPath];
-    NSArray *descriptionsArray = [self descriptionsForWeatherCode:
-                                   [currentConditions objectForKey:@"weatherCode"]];
-    [_pessimizedCurrentConditions setObject:descriptionsArray[0] forKey:@"description"];
-    
+        
     int i = 0;
     for (NSDictionary *day in forecastConditions)
     {
-        descriptionsArray = [self descriptionsForWeatherCode:
-                              [day objectForKey:@"weatherCode"]];
-        [_pessimizedForecastConditions[i] setObject:descriptionsArray[0] forKey:@"description"];
+        _descriptionsArrays[i] = [self descriptionsForWeatherCode:day[@"weatherCode"]];
         i++;
     }
     
@@ -517,15 +538,55 @@
 }
 
 // ******************************************************************************** isWinter
-- (BOOL)isWinter
+- (BOOL)isWinter //redundant... !isSummer is the same thing
 {
     return  ((self.dateComponents.month == 12) || (self.dateComponents.month < 3));
 }
 
 - (void)dealloc
 {
-    
+    _sadWindspeedMiles = nil;
+    _sadMaxTempF = nil;
+    _sadMinTempF = nil;
+    _sadPrecipMM = nil;
 
+}
+
+// ******************************************************************************** dateForDay
+- (NSDate *)dateForDay:(int)day
+{
+    NSString *dateString = [forecastConditions[day] objectForKey:@"date"];
+    debug(@"date string: %@", dateString);
+    NSDateFormatter *dateFormat = [[NSDateFormatter alloc] init];
+    [dateFormat setDateFormat:@"yyyy-MM-dd"];
+    NSDate *date =[dateFormat dateFromString:dateString];
+    debug(@"date: %@", date);
+    return date;
+}
+
+// ******************************************************************************** descriptionForDay
+- (NSString *)descriptionForDay:(int)day
+{
+    int index = descriptionIndices[day];
+    return _descriptionsArrays[day][index];
+}
+
+// ******************************************************************************** descriptionForDay
+- (NSString *)locationString
+{
+    NSString *city = nearest_area[@"areaName"][0][@"value"];
+    NSString *country = nearest_area[@"country"][0][@"value"];
+    NSString *region = nearest_area[@"region"][0][@"value"];
+    NSString *location;
+    
+    if ( ([country isEqualToString:@"USA"]) || ([country isEqualToString:@"United States Of America"])){
+        location = [NSString stringWithFormat:@"%@, %@", city, region];
+    } else {
+        location = [NSString stringWithFormat:@"%@, %@", city, country];
+    }
+    
+    debug(@"location: %@", location);
+    return location;
 }
 
 // ******************************************************************************** canConnect
@@ -536,7 +597,7 @@
                         error:&error];
     if (error) {
         //not connected to internet or server not available, used cached data, display message, etc
-        NSLog(@"Connection to WWO failed");
+        debug(@"Connection to WWO failed");
         return NO;
     }
     return YES;
