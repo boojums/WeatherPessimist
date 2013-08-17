@@ -30,6 +30,7 @@
 @property (strong, nonatomic) CLLocation *currentLocation;
 
 - (IBAction)currentLocationSearch;
+- (void)querySearchWithQuery:(NSString *)query;
 - (IBAction)querySearch;
 - (IBAction)textFieldReturn:(id)sender;
 - (IBAction)backgroundTouched:(id)sender;

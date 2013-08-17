@@ -10,7 +10,7 @@
 {
 
 }
-//try a C-style array of ints instead, with methods for returning the values (as ints or strings)?
+//functions to return the ones you want instead of copying them into a new array?
 @property (strong, nonatomic) NSMutableArray *maxTempF;
 @property (strong, nonatomic) NSMutableArray *minTempF;
 @property (strong, nonatomic) NSMutableArray *precipMM;
@@ -22,8 +22,8 @@
 @property (strong, nonatomic) NSMutableArray *sadPrecipMM;
 @property (strong, nonatomic) NSMutableArray *sadWindspeedMiles;
 
+//ditto functions to return the one you want instead of copying?
 @property (strong, nonatomic) NSMutableArray *descriptionsArrays;
-@property (strong, nonatomic) NSDateComponents   *dateComponents;
 @property (strong, nonatomic) NSMutableArray *imageNames;
 
 +(BOOL)canConnect;

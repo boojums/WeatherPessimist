@@ -8,16 +8,16 @@
 		<dict/>
 		<key>Am</key>
 		<dict/>
-		<key>BWh</key>
-		<string>kHotDesert</string>
 		<key>Aw</key>
 		<dict/>
+		<key>BWh</key>
+		<string>kHotDesert</string>
 		<key>BSh</key>
 		<string>kHotDesert</string>
 		<key>BWk</key>
-		<string>kHotDesert</string>
+		<string>kSteppe</string>
 		<key>BSk</key>
-		<string>kMountainWest</string>
+		<string>kSteppe</string>
 		<key>Csa</key>
 		<dict/>
 		<key>Csb</key>

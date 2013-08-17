@@ -4,6 +4,9 @@
 
 /* To do list:
  - add search for location support from http://www.worldweatheronline.com/feed/search.ashx
+ - pull last data info before search completed
+ - pull last search info before location received
+ - save data to something when updating with a successful search
 */
 
 
@@ -30,8 +33,6 @@
         debug(@"Can connect");
     }
     
-    //archived data should be loaded from last use. Don't fetch until asked?
-
     pageControlBeingUsed = NO;
     
     //check preferences for number of days to show? 
@@ -48,9 +49,15 @@
     self.pageControl.numberOfPages = 2;
     
     //somehow wait for current location and update automatically -- perhaps in didUpdateToLocation
-    if(self.currentLocation != nil)
+    //archived data should be loaded from last use. Don't fetch until asked?
+    NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
+    NSString *lastQuery = [prefs stringForKey:@"lastquery"];
+    debug(@"lastquery: %@", lastQuery);
+    if(self.currentLocation == nil) {
+        [self querySearchWithQuery:lastQuery];
+    } else {
         [self currentLocationSearch];
-
+    }
 }
 
 //could be one method using id of button to determine whether to build current location query or search
@@ -89,13 +96,8 @@
     return;
 }
 
-- (IBAction)querySearch
+- (void)querySearchWithQuery:(NSString *)query
 {
-    //should include a search for valid search possibilities
-    debug(@"querySearch");
-    NSString *query = self.searchField.text;
-    [self.searchField resignFirstResponder];
-        
     if([self timeToUpdate:query])
     {
         weatherData = [[WXPData alloc] initWithQuery:query];
@@ -110,7 +112,18 @@
         [prefs synchronize];
     }
     return;
- }
+}
+
+
+- (IBAction)querySearch
+{
+    //should include a search for valid search possibilities
+    debug(@"querySearch");
+    NSString *query = self.searchField.text;
+    [self.searchField resignFirstResponder];
+    
+    [self querySearchWithQuery:query];
+}
 
 
 - (void)updateLabels
@@ -141,6 +154,8 @@
     [dateFormatter setDateFormat:@"EEE MMM d h:mm a"];
     NSString *dateString = [dateFormatter stringFromDate:today];
     self.updatedLabel.text = [NSString stringWithFormat:@"Last Updated: %@", dateString];
+    
+    //save data here to be recovered when required  
 }
 
 - (BOOL)timeToUpdate:(NSString *)query

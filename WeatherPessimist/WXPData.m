@@ -101,6 +101,7 @@
     NSDictionary    *currentConditions;
     NSMutableArray  *forecastConditions;
     NSDictionary    *nearest_area;
+    NSDateComponents *dateComponents;
 }
 
 @end
@@ -233,7 +234,7 @@
     
     koppenClass = [[climate_classification objectForKey:latitude] objectForKey:longitude];
     NSString *climate = [[climate_classification objectForKey:@"codes"] objectForKey:koppenClass];
-    debug(@"climate classification is: %@", climate);
+    debug(@"koppen classification is: %@", koppenClass);
     
     //get climate mapping from  climate_class plist, codes dictionary
     if (climate) {
@@ -476,24 +477,21 @@
             [_windspeedMiles addObject:day[@"windspeedMiles"]];
             [_windDir addObject:day[@"winddirection"]];
         }
-    
-    //get today's date -- should probably use date from weather request instead? need local date
-    NSDate *today = [NSDate date];
+    NSDate *date = [self dateForDay:0];
     NSCalendar *gregorian = [[NSCalendar alloc]
                              initWithCalendarIdentifier:NSGregorianCalendar];
-    _dateComponents = [gregorian components:NSMonthCalendarUnit fromDate:today];
+    dateComponents = [gregorian components:NSMonthCalendarUnit fromDate:date];
+    [self setClimateZoneByLatLong];
     
-    //if query was of type 'zip code'
+    /*//if query was of type 'zip code'
     NSString *requestType = [[[allData objectForKey:@"request"] objectAtIndex:0] objectForKey:@"type"];
     if ([requestType isEqualToString:@"Zipcode"]){
         NSNumber *zip = [[[allData objectForKey:@"request"] objectAtIndex:0] objectForKey:@"query"];
         [self setClimateZoneByZip:zip];
     } else {
         [self setClimateZoneByLatLong];
-    }
-    
-    //NSLog(@"climateZone set to %i, %@", climateZone, climateZoneNames[climateZone]);
-    
+    }*/
+        
     //should check if plistPath is valid
     NSString *plistPath = [[NSBundle mainBundle] pathForResource:@"wxcodes" ofType:@"plist"];
     climateZoneCodeDictionary = [NSDictionary dictionaryWithContentsOfFile:plistPath];
@@ -534,13 +532,14 @@
 // ******************************************************************************** isSummer
 - (BOOL)isSummer
 {
-    return  ((self.dateComponents.month > 5) && (self.dateComponents.month < 9));
+    //should check for hemisphere
+    return  ((dateComponents.month > 5) && (dateComponents.month < 9));
 }
 
 // ******************************************************************************** isWinter
 - (BOOL)isWinter //redundant... !isSummer is the same thing
 {
-    return  ((self.dateComponents.month == 12) || (self.dateComponents.month < 3));
+    return  ((dateComponents.month == 12) || (dateComponents.month < 3));
 }
 
 - (void)dealloc
